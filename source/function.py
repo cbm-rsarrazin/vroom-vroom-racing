@@ -18,7 +18,7 @@ def reward_function(params):
     while loop:
         if source_idx == target_idx:
             # all waypoints has been checked
-            return -1
+            return -10
 
         target = waypoints[target_idx % len(waypoints)]
 
@@ -65,7 +65,7 @@ def reward_function(params):
     # score computing
     score = round(float(1 - math.fabs(angle_diff) / 360), 1)
     if score < score_min:
-        return 0
+        return -5
     return score
 
 
