@@ -41,26 +41,14 @@ def reward_function(params):
 
     # angle from car to the farest visible waypoint
     best_dir = atan2_deg(x, y, target[0], target[1])
-    # angle from first closest waypoint to second clothest waypoint
-    closest_waypoints_dir = atan2_deg(waypoints[closest_waypoints[0]][0], waypoints[closest_waypoints[0]][1],
-                                      waypoints[closest_waypoints[1]][0], waypoints[closest_waypoints[1]][1])
-
-    print("target: " + str(target))
+    best_dir = nor(best_dir)
     print("best dir: " + str(best_dir))
-    print("waypoints dir: " + str(closest_waypoints_dir))
-
-    # compute average angle between best and current waypoints
-    avg_dir = math.atan2((math.sin(math.radians(closest_waypoints_dir)) + math.sin(math.radians(best_dir))) / 2,
-                         (math.cos(math.radians(closest_waypoints_dir)) + math.cos(math.radians(best_dir))) / 2)
-    avg_dir = math.degrees(avg_dir)
-    avg_dir = nor(avg_dir)
-    print("avg dir: " + str(avg_dir))
 
     heading = nor(heading)
     print("heading: " + str(heading))
 
     # compute angle diff
-    angle_diff = angle_min_diff(heading, avg_dir)
+    angle_diff = angle_min_diff(heading, best_dir)
     print("diff: " + str(angle_diff))
 
     # score computing
