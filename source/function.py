@@ -1,7 +1,8 @@
 def reward_function(params):
     import math
 
-    score_min = 0.5
+    ratio_score_min = 0.5
+    score_max = 5
 
     track_width = params['track_width']
     heading = params['heading']
@@ -18,7 +19,7 @@ def reward_function(params):
     while loop:
         if source_idx == target_idx:
             # all waypoints has been checked
-            return -10
+            return -5
 
         target = waypoints[target_idx % len(waypoints)]
 
@@ -64,9 +65,9 @@ def reward_function(params):
 
     # score computing
     score = round(float(1 - math.fabs(angle_diff) / 360), 1)
-    if score < score_min:
-        return -5
-    return score
+    if score < ratio_score_min:
+        return -score_max
+    return score_max * pow(score, 2)
 
 
 def dps(px, py, x1, y1, x2, y2):
