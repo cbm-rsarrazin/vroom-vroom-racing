@@ -1,6 +1,8 @@
 def reward_function(params):
     import math
 
+    score_min = 0.5
+
     track_width = params['track_width']
     heading = params['heading']
     waypoints = params['waypoints']
@@ -61,7 +63,10 @@ def reward_function(params):
     print("diff: " + str(angle_diff))
 
     # score computing
-    return float(1 - math.fabs(angle_diff) / 360)
+    score = round(float(1 - math.fabs(angle_diff) / 360), 1)
+    if score < score_min:
+        return 0
+    return score
 
 
 def dps(px, py, x1, y1, x2, y2):
