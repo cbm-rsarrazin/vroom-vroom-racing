@@ -54,7 +54,7 @@ def reward_function(params):
     # score computing
     score = round(float(1 - math.fabs(angle_diff) / 360), 1)
     if score < ratio_score_min:
-        return 0
+        return -1
     return score_max * pow(score, 2)
 
 
