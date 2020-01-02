@@ -2,8 +2,6 @@ def reward_function(params):
     import math
 
     reward = 0
-
-    ratio_score_min = 0.5
     score_max = 5
 
     progress = params['progress']
