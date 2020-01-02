@@ -54,12 +54,8 @@ def reward_function(params):
     angle_diff = angle_min_diff(heading, best_dir)
     print("diff: " + str(angle_diff))
 
-    # ratio computing
-    ratio = round(pow(float(1 - math.fabs(angle_diff) / 360), 2), 1)
-    if ratio < ratio_score_min:
-        return -3
-
     # reward computing
+    ratio = round(pow(float(1 - math.fabs(angle_diff) / 360), 2), 1)
     reward += score_max * ratio
     if progress == 100:
         reward = reward + 20
