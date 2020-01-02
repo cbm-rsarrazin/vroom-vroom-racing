@@ -2,6 +2,7 @@ def reward_function(params):
     import math
 
     reward = 0
+    score_except = 20
     score_max = 5
 
     progress = params['progress']
@@ -20,7 +21,7 @@ def reward_function(params):
     while loop:
         if source_idx == target_idx:
             # all waypoints has been checked
-            return -score_max
+            return -score_except
 
         target = waypoints[target_idx % len(waypoints)]
 
@@ -39,6 +40,7 @@ def reward_function(params):
             # then exit the loop
 
     target = waypoints[target_idx % len(waypoints)]
+    print("target: " + str(target))
 
     # angle from car to the farest visible waypoint
     best_dir = atan2_deg(x, y, target[0], target[1])
@@ -49,14 +51,14 @@ def reward_function(params):
     print("heading: " + str(heading))
 
     # compute angle diff
-    angle_diff = angle_min_diff(heading, best_dir)
+    angle_diff = math.fabs(angle_min_diff(heading, best_dir))
     print("diff: " + str(angle_diff))
 
     # reward computing
-    ratio = round(pow(float(1 - math.fabs(angle_diff) / 180), 2), 1)
+    ratio = round(pow(float(1 - angle_diff / 180), 2), 1)
     reward += score_max * ratio
     if progress == 100:
-        reward += 20
+        reward += score_except
     return reward
 
 
