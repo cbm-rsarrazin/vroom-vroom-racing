@@ -55,10 +55,10 @@ def reward_function(params):
     print("diff: " + str(angle_diff))
 
     # reward computing
-    ratio = round(pow(float(1 - math.fabs(angle_diff) / 360), 2), 1)
+    ratio = round(pow(float(1 - math.fabs(angle_diff) / 180), 2), 1)
     reward += score_max * ratio
     if progress == 100:
-        reward += + 20
+        reward += 20
     return reward
 
 
