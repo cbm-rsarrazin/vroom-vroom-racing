@@ -3,6 +3,7 @@ from source.function import reward_function
 
 def main():
     params = {
+        'progress': 30,
         'track_width': 1.0,
         'heading': 0.0,
         'waypoints': [[1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [4, 5], [3, 5], [2, 5],

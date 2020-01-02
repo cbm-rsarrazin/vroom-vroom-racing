@@ -1,9 +1,12 @@
 def reward_function(params):
     import math
 
+    reward = 0
+
     ratio_score_min = 0.5
     score_max = 5
 
+    progress = params['progress']
     track_width = params['track_width']
     heading = params['heading']
     waypoints = params['waypoints']
@@ -19,7 +22,7 @@ def reward_function(params):
     while loop:
         if source_idx == target_idx:
             # all waypoints has been checked
-            return -5
+            return -score_max
 
         target = waypoints[target_idx % len(waypoints)]
 
@@ -51,11 +54,16 @@ def reward_function(params):
     angle_diff = angle_min_diff(heading, best_dir)
     print("diff: " + str(angle_diff))
 
-    # score computing
-    score = round(float(1 - math.fabs(angle_diff) / 360), 1)
-    if score < ratio_score_min:
-        return -1
-    return score_max * pow(score, 2)
+    # ratio computing
+    ratio = round(pow(float(1 - math.fabs(angle_diff) / 360), 2), 1)
+    if ratio < ratio_score_min:
+        return -3
+
+    # reward computing
+    reward += score_max * ratio
+    if progress == 100:
+        reward = reward + 20
+    return reward
 
 
 def dps(px, py, x1, y1, x2, y2):
