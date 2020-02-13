@@ -34,7 +34,7 @@ After training your model with the additional logging added find the name of the
 
 Now generate a heatmap by running the script
 ```bash
-python3 Get-DeepRacerHeatMap.py --profile deepracer --logstreamname sim-nd2x4c3ph1d3/2019-06-05T14-39-30.940Z_3f5ddea9-6535-45d0-b1c7-ceb4b054f884/SimulationApplicationLogs
+python3 Get-DeepRacerHeatMap.py --profile deepracer --logstreamname sim-nx2xpv0l3gfz/2020-02-12T22-43-08.480Z_ee298034-bce7-471b-bf6f-f8517e5fa6ef/SimulationApplicationLogs
 ```
 
 ![](./examples/london_loop.png "London Loop")

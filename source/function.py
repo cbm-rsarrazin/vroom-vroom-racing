@@ -2,7 +2,7 @@ def reward_function(params):
     import math
 
     reward = 0
-    score_except = 20
+    score_except = 100
     score_max = 5
 
     progress = params['progress']
@@ -62,7 +62,7 @@ def reward_function(params):
     if progress == 100:
         reward += score_except
 
-    log(waypoints, closest_waypoints, track_width, steering_angle, steps)
+    log(waypoints, closest_waypoints, track_width, steering_angle, steps, x, y, target[0], target[1], best_dir)
 
     return reward
 
@@ -117,13 +117,6 @@ def nor(angle):
     return angle
 
 
-def log(waypoints, closest_waypoints, track_width, steering_angle, steps):
-    import math
-    coord0 = waypoints[closest_waypoints[0]]
-    coord1 = waypoints[closest_waypoints[1]]
-    myradians = math.atan2(coord1[1] - coord0[1], coord1[0] - coord0[0])
-    mydegrees = math.degrees(myradians)
-    print("Waypoint0:{},X:{},Y:{},heading:{},trackwidth:{},steeringangle:{},steps:{}".format(closest_waypoints[0],
-                                                                                             coord0[0], coord0[1],
-                                                                                             mydegrees, track_width,
-                                                                                             steering_angle, steps))
+def log(closest_waypoints, track_width, steering_angle, steps, x, y, target_x, target_y, best_dir):
+    print("Waypoint0:{},X:{},Y:{},targetX:{},targetY:{},heading:{},trackwidth:{},steeringangle:{},steps:{}".format(
+        closest_waypoints[0], x, y, target_x, target_y, best_dir, track_width, steering_angle, steps))
