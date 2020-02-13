@@ -62,7 +62,7 @@ def reward_function(params):
     if progress == 100:
         reward += score_except
 
-    log(waypoints, closest_waypoints, track_width, steering_angle, steps, x, y, target[0], target[1], best_dir)
+    log(closest_waypoints, track_width, steering_angle, steps, x, y, target[0], target[1], best_dir)
 
     return reward
 
