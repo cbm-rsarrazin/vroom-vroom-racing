@@ -31,6 +31,20 @@ def reward_function(params):
             current = waypoints[i % len(waypoints)]
             if (dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2,
                                                                                       track_width / 2)):
+
+                dir_target = nor(atan2_deg(target[0], target[1],
+                                           waypoints[(target_idx - 1) % len(waypoints)][0],
+                                           waypoints[(target_idx - 1) % len(waypoints)][1]))
+
+                dir_clothest = nor(atan2_deg(
+                    waypoints[closest_waypoints[0]][0], waypoints[closest_waypoints[0]][1],
+                    waypoints[closest_waypoints[1]][0], waypoints[closest_waypoints[1]][1]))
+
+                head = nor(heading)
+
+                if 0.9 * (angle_min_diff(head, dir_target) + angle_min_diff(head, dir_clothest)) > angle_min_diff(dir_clothest, dir_target):
+                    reward -= score_except
+
                 loop = False
                 break
 
