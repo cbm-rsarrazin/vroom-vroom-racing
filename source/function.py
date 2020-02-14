@@ -2,7 +2,7 @@ def reward_function(params):
     import math
 
     reward = 0
-    score_except = 100
+    score_except = 20
     score_max = 5
 
     progress = params['progress']
@@ -29,7 +29,6 @@ def reward_function(params):
 
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
-            print(current)
             if (dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2,
                                                                                       track_width / 2)):
                 loop = False
@@ -56,13 +55,15 @@ def reward_function(params):
     angle_diff = math.fabs(angle_min_diff(heading, best_dir))
     print("diff: " + str(angle_diff))
 
-    # reward computing
+    # reward computing for best dir
     ratio = round(pow(float(1 - angle_diff / 180), 2), 1)
     reward += score_max * ratio
+    # reward computing for progress
     if progress == 100:
-        reward += score_except
+        reward += 5 * score_except
 
-    log(closest_waypoints, track_width, steering_angle, steps, x, y, target[0], target[1], best_dir)
+    log(waypoints, closest_waypoints, track_width, steering_angle,
+        steps, x, y, target[0], target[1], best_dir, reward)
 
     return reward
 
@@ -117,6 +118,34 @@ def nor(angle):
     return angle
 
 
-def log(closest_waypoints, track_width, steering_angle, steps, x, y, target_x, target_y, best_dir):
-    print("Waypoint0:{},X:{},Y:{},targetX:{},targetY:{},heading:{},trackwidth:{},steeringangle:{},steps:{}".format(
-        closest_waypoints[0], x, y, target_x, target_y, best_dir, track_width, steering_angle, steps))
+def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
+        vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_best_dir, reward):
+
+    import math
+    coord0 = waypoints[closest_waypoints[0]]
+    coord1 = waypoints[closest_waypoints[1]]
+    myradians = math.atan2(coord1[1] - coord0[1], coord1[0] - coord0[0])
+    mydegrees = math.degrees(myradians)
+
+    print("Waypoint0:{},"
+          "X:{},Y:{},"
+          "heading:{},"
+          "trackwidth:{},"
+          "steeringangle:{},"
+          "steps:{},"
+          "vehicle_x:{},"
+          "vehicle_y:{},"
+          "vehicle_target_x:{},"
+          "vehicle_target_y:{},"
+          "vehicle_best_dir:{},"
+          "reward:{}".format(
+            closest_waypoints[0],
+            coord0[0], coord0[1],
+            mydegrees,
+            track_width,
+            steering_angle,
+            steps,
+            vehicle_x, vehicle_y,
+            vehicle_target_x, vehicle_target_y,
+            vehicle_best_dir,
+            reward))

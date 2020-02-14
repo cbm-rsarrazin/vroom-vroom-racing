@@ -125,6 +125,14 @@ def get_string_path_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch)
         y=float(commasplit[2].split(':')[1].strip())
         heading=float(commasplit[3].split(':')[1].strip())
         trackwidth=float(commasplit[4].split(':')[1].strip())
+
+        vehicle_x=float(commasplit[7].split(':')[1].strip())
+        vehicle_y=float(commasplit[8].split(':')[1].strip())
+        vehicle_target_x=float(commasplit[9].split(':')[1].strip())
+        vehicle_target_y=float(commasplit[10].split(':')[1].strip())
+        vehicle_best_dir=float(commasplit[11].split(':')[1].strip())
+        reward=float(commasplit[12].split(':')[1].strip())
+
         coord = {'waypoint': waypoint, 'x':x, 'y':y, 'heading':heading, 'trackwidth':trackwidth}
         coords.append(coord)
         #print("X: {}, Y: {}".format(x,y))
