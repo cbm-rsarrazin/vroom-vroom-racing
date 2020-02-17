@@ -42,7 +42,7 @@ def reward_function(params):
                 head = nor(heading)
 
                 if math.fabs(angle_min_diff(head, dir_target)) + math.fabs(angle_min_diff(head, dir_clothest)) > 1.1 * math.fabs(angle_min_diff(dir_clothest, dir_target)):
-                    reward -= score_max
+                    reward += score_max
 
                 loop = False
                 break
