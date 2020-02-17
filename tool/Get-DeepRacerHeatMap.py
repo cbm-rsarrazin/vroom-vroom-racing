@@ -16,11 +16,12 @@ args = parser.parse_args()
 
 # constants
 starttimeepoch = int(datetime.datetime(2018, 1, 30, 18, 0, 0).timestamp()) * 1000
-endtimeepoch =   int(datetime.datetime(2030, 1, 30, 18, 0, 0).timestamp()) * 1000
+endtimeepoch = int(datetime.datetime(2030, 1, 30, 18, 0, 0).timestamp()) * 1000
 loggroupname = '/aws/robomaker/SimulationJobs'
 logstreamname = args.logstreamname
-profile=args.profile
-region='us-east-1'
+profile = args.profile
+region = 'us-east-1'
+
 
 def get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
     filterPattern = 'SIM_TRACE_LOG'
@@ -50,16 +51,16 @@ def get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
             )
         events += response['events']
         count += len(response['events'])
-        print (count)
+        print(count)
         
-        ## while 
+        # while
         if 'nextToken' not in response.keys():
             print ('Data Collected...')
             break
         else:
-            nextToken=response['nextToken']
-            #break # unhash out for testing
-        #print (nextToken)
+            nextToken = response['nextToken']
+            # break # unhash out for testing
+        # print (nextToken)
 
     # print (len(events))
     xs = []
@@ -71,13 +72,13 @@ def get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
         y = float(split[3])
         xs.append(x)
         ys.append(y)
-        #print("X: {}, Y: {}".format(x,y))
+        # print("X: {}, Y: {}".format(x,y))
 
-    #print(len(xs))
-    #print(len(ys))
-    return xs,ys
+    # print(len(xs))
+    # print(len(ys))
+    return xs, ys
 
-def get_string_path_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
+def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
     filterPattern='Waypoint0'
     nextToken = ''
     count = 0
@@ -104,58 +105,58 @@ def get_string_path_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch)
             )
         events += response['events']
         count += len(response['events'])
-        print (count)
+        print(count)
         
-        ## while 
+        # while
         if 'nextToken' not in response.keys():
-            print ('End')
+            print('End')
             break
         else:
-            nextToken=response['nextToken']
-            #break # unhash out for testing
-        #print (nextToken)
+            nextToken = response['nextToken']
+            # break # unhash out for testing
+        # print (nextToken)
 
     print (len(events))
     coords = []
     print('Parsing Waypoint Data...')
     for event in events:
         commasplit = event['message'].split(',')
-        waypoint=int(commasplit[0].split(':')[1].strip())
-        x=float(commasplit[1].split(':')[1].strip())
-        y=float(commasplit[2].split(':')[1].strip())
-        heading=float(commasplit[3].split(':')[1].strip())
-        trackwidth=float(commasplit[4].split(':')[1].strip())
+        waypoint = int(commasplit[0].split(':')[1].strip())
+        x = float(commasplit[1].split(':')[1].strip())
+        y = float(commasplit[2].split(':')[1].strip())
+        heading = float(commasplit[3].split(':')[1].strip())
+        trackwidth = float(commasplit[4].split(':')[1].strip())
 
-        vehicle_x=float(commasplit[7].split(':')[1].strip())
-        vehicle_y=float(commasplit[8].split(':')[1].strip())
-        vehicle_target_x=float(commasplit[9].split(':')[1].strip())
-        vehicle_target_y=float(commasplit[10].split(':')[1].strip())
-        vehicle_best_dir=float(commasplit[11].split(':')[1].strip())
-        reward=float(commasplit[12].split(':')[1].strip())
+        vehicle_x = float(commasplit[7].split(':')[1].strip())
+        vehicle_y = float(commasplit[8].split(':')[1].strip())
+        vehicle_target_x = float(commasplit[9].split(':')[1].strip())
+        vehicle_target_y = float(commasplit[10].split(':')[1].strip())
+        vehicle_best_dir = float(commasplit[11].split(':')[1].strip())
+        reward = float(commasplit[12].split(':')[1].strip())
 
-        coord = {'waypoint': waypoint, 'x':x, 'y':y, 'heading':heading, 'trackwidth':trackwidth}
+        coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth}
         coords.append(coord)
-        #print("X: {}, Y: {}".format(x,y))
+        # print("X: {}, Y: {}".format(x,y))
 
-    #print(len(coords))
-    uniquewaypoints = list({v['waypoint']:v for v in coords}.values()) # get unique items in list of dicts
+    # print(len(coords))
+    uniquewaypoints = list({v['waypoint']:v for v in coords}.values())  # get unique items in list of dicts
     print("Unique Waypoints:{}".format(len(uniquewaypoints)))
-    uniquewaypoints = sorted(uniquewaypoints, key = lambda i: i['waypoint']) 
+    uniquewaypoints = sorted(uniquewaypoints, key=lambda i: i['waypoint'])
 
     center_string_path_data = []
-    firstwaypoint=True
+    firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x']
         y = waypoint['y']
         if firstwaypoint:
-            center_string_path_data.append((mpath.Path.MOVETO, (x,y)))
+            center_string_path_data.append((mpath.Path.MOVETO, (x, y)))
         else:
-            center_string_path_data.append((mpath.Path.LINETO, (x,y)))
-        firstwaypoint=False
-    center_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0))) # close polygon
+            center_string_path_data.append((mpath.Path.LINETO, (x, y)))
+        firstwaypoint = False
+    center_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0)))  # close polygon
 
     inside_string_path_data = []
-    firstwaypoint=True
+    firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x'] + (waypoint['trackwidth']/2) * math.cos(math.radians(waypoint['heading']+90))
         y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']+90))   
@@ -163,48 +164,49 @@ def get_string_path_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch)
             inside_string_path_data.append((mpath.Path.MOVETO, (x,y)))
         else:
             inside_string_path_data.append((mpath.Path.LINETO, (x,y)))
-        firstwaypoint=False
+        firstwaypoint = False
     inside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0))) # close polygon
 
     outside_string_path_data = []
-    firstwaypoint=True
+    firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x'] + (waypoint['trackwidth']/2) * math.cos(math.radians(waypoint['heading']-90))
         y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']-90))   
         if firstwaypoint:
-            outside_string_path_data.append((mpath.Path.MOVETO, (x,y)))
+            outside_string_path_data.append((mpath.Path.MOVETO, (x, y)))
         else:
-            outside_string_path_data.append((mpath.Path.LINETO, (x,y)))
-        firstwaypoint=False
-    outside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0))) # close polygon
+            outside_string_path_data.append((mpath.Path.LINETO, (x, y)))
+        firstwaypoint = False
+    outside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0)))  # close polygon
+
+    return center_string_path_data, inside_string_path_data, outside_string_path_data
 
 
-    return center_string_path_data,inside_string_path_data,outside_string_path_data
+# MAIN
 
-## MAIN ##
+session = boto3.Session(profile_name = profile, region_name = region)
 
-session = boto3.Session(profile_name=profile,region_name=region)
 logs_client = session.client('logs')
 
 # collect heatmap data
-heatmap_data = get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch)
-xs=heatmap_data[0]
-ys=heatmap_data[1]
+heatmap_data = get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
+xs = heatmap_data[0]
+ys = heatmap_data[1]
 
 fig, ax = plt.subplots(figsize=(8, 6))
 
 print('Loading Heatmap Data...')
-hist = plt.hist2d(xs, ys, bins=(250,125), normed=False, cmap='hot') # cmap -> https://matplotlib.org/users/colormaps.html
+hist = plt.hist2d(xs, ys, bins=(250, 125), normed=False, cmap='hot')
 plt.xlabel('x axis')
 plt.ylabel('y axis')
 
 # collect track limits data
-string_path_data = get_string_path_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch)
+string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
 # center
 codes, verts = zip(*string_path_data[0])
 string_path = mpath.Path(verts, codes)
-patch = mpatches.PathPatch(string_path, edgecolor='white', facecolor="none", lw=1, ls='--') # https://matplotlib.org/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_linestyle
+patch = mpatches.PathPatch(string_path, edgecolor='white', facecolor="none", lw=1, ls='--')
 ax.add_patch(patch)
 
 # inside
