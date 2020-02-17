@@ -55,7 +55,7 @@ def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
         
         # while
         if 'nextToken' not in response.keys():
-            print ('Data Collected...')
+            print('Data Collected...')
             break
         else:
             nextToken = response['nextToken']
@@ -135,15 +135,22 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         vehicle_best_dir = float(commasplit[11].split(':')[1].strip())
         reward = float(commasplit[12].split(':')[1].strip())
 
-        coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth}
+        coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
+                 'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
+                 'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
+                 'vehicle_best_dir': vehicle_best_dir, 'reward': reward}
+
         coords.append(coord)
         # print("X: {}, Y: {}".format(x,y))
 
+    print(len(coords))
+
     # print(len(coords))
-    uniquewaypoints = list({v['waypoint']:v for v in coords}.values())  # get unique items in list of dicts
+    uniquewaypoints = list({v['waypoint']: v for v in coords}.values())  # get unique items in list of dicts
     print("Unique Waypoints:{}".format(len(uniquewaypoints)))
     uniquewaypoints = sorted(uniquewaypoints, key=lambda i: i['waypoint'])
 
+    # center_string_path_data
     center_string_path_data = []
     firstwaypoint = True
     for waypoint in uniquewaypoints:
@@ -156,18 +163,20 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         firstwaypoint = False
     center_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0)))  # close polygon
 
+    # inside_string_path_data
     inside_string_path_data = []
     firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x'] + (waypoint['trackwidth']/2) * math.cos(math.radians(waypoint['heading']+90))
         y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']+90))   
         if firstwaypoint:
-            inside_string_path_data.append((mpath.Path.MOVETO, (x,y)))
+            inside_string_path_data.append((mpath.Path.MOVETO, (x, y)))
         else:
-            inside_string_path_data.append((mpath.Path.LINETO, (x,y)))
+            inside_string_path_data.append((mpath.Path.LINETO, (x, y)))
         firstwaypoint = False
-    inside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0))) # close polygon
+    inside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0)))  # close polygon
 
+    # outside_string_path_data
     outside_string_path_data = []
     firstwaypoint = True
     for waypoint in uniquewaypoints:
@@ -180,12 +189,12 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         firstwaypoint = False
     outside_string_path_data.append((mpath.Path.CLOSEPOLY, (0, 0)))  # close polygon
 
-    return center_string_path_data, inside_string_path_data, outside_string_path_data
+    return center_string_path_data, inside_string_path_data, outside_string_path_data, coords
 
 
 # MAIN
 
-session = boto3.Session(profile_name = profile, region_name = region)
+session = boto3.Session(profile_name=profile, region_name=region)
 
 logs_client = session.client('logs')
 
@@ -204,6 +213,16 @@ plt.ylabel('y axis')
 # collect track limits data
 string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
+# vehicle position
+coords = list(string_path_data[3])
+vx = []
+vy = []
+for coord in coords:
+    vx.append(coord['vehicle_x'])
+    vy.append(coord['vehicle_y'])
+plt.scatter(vx, vy, c=(0, 0, 1, 0.1))
+print('len: ' + str(len(coords)))
+
 # center
 codes, verts = zip(*string_path_data[0])
 string_path = mpath.Path(verts, codes)
@@ -221,6 +240,7 @@ codes, verts = zip(*string_path_data[2])
 string_path = mpath.Path(verts, codes)
 patch = mpatches.PathPatch(string_path, edgecolor='white', facecolor="none", lw=1)
 ax.add_patch(patch)
+
 
 print('Displaying Heatmap')
 plt.show()
