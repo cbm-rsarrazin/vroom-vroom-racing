@@ -213,15 +213,29 @@ plt.ylabel('y axis')
 # collect track limits data
 string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
-# vehicle position
 coords = list(string_path_data[3])
+
+# vehicle position
 vx = []
 vy = []
 for coord in coords:
     vx.append(coord['vehicle_x'])
     vy.append(coord['vehicle_y'])
-plt.scatter(vx, vy, c=(0, 0, 1, 0.1))
-print('len: ' + str(len(coords)))
+plt.scatter(vx, vy, c=(0, 0, 1, 0.03))
+
+# line target
+for i in range(len(coords)):
+    if i % 5000 == 0:
+        coord = coords[i]
+
+        vehicle_x = coord['vehicle_x']
+        vehicle_y = coord['vehicle_y']
+        vehicle_target_x = coord['vehicle_target_x']
+        vehicle_target_y = coord['vehicle_target_y']
+
+        plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 0, 1))
+        plt.scatter(vehicle_x, vehicle_y, c=(0, 1, 0))
+        plt.scatter(vehicle_target_x, vehicle_target_y, c=(1, 0, 0))
 
 # center
 codes, verts = zip(*string_path_data[0])
