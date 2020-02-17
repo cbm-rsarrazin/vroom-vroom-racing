@@ -38,7 +38,7 @@ def reward_function(params):
         if loop:
             target_idx = target_idx + 1
         else:
-            target_idx = target_idx - 1
+            target_idx = target_idx - 3
             # then exit the loop
 
     target = waypoints[target_idx % len(waypoints)]
