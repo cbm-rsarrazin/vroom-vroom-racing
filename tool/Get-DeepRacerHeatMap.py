@@ -23,7 +23,7 @@ profile = args.profile
 region = 'us-east-1'
 
 
-def get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
+def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
     filterPattern = 'SIM_TRACE_LOG'
 
     nextToken = ''
@@ -78,6 +78,7 @@ def get_heatmap_data(loggroupname,logstreamname,starttimeepoch,endtimeepoch):
     # print(len(ys))
     return xs, ys
 
+
 def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
     filterPattern='Waypoint0'
     nextToken = ''
@@ -116,7 +117,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
             # break # unhash out for testing
         # print (nextToken)
 
-    print (len(events))
+    print(len(events))
     coords = []
     print('Parsing Waypoint Data...')
     for event in events:
