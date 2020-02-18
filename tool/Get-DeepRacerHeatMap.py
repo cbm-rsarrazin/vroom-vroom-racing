@@ -248,14 +248,14 @@ for i in range(len(coords)):
     heading_x = heading_point[0]
     heading_y = heading_point[1]
 
-    steering_point = get_point_from_angle(vehicle_x, vehicle_y, steering, 0.5)
+    steering_point = get_point_from_angle(vehicle_x, vehicle_y, heading + steering, 0.5)
     steering_x = steering_point[0]
     steering_y = steering_point[1]
 
     if reward not in rewards:
         rewards.append(reward)
 
-    if reward >= 3 and i % 1000 == 0:
+    if reward >= 4 and i % 5000 == 0:
         vx.append(vehicle_x)
         vy.append(vehicle_y)
         hx.append(heading_x)
@@ -263,15 +263,15 @@ for i in range(len(coords)):
         tx.append(target_x)
         ty.append(target_y)
 
-        plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)           # target direction
+        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=green)       # heading direction
+        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)    # steering direction
 
         plt.scatter(target_x, target_y, c=red)              # target position
         plt.scatter(heading_x, heading_y, c=green)          # heading position
         plt.scatter(steering_x, steering_y, c=yellow)       # steering position
 
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)           # target direction
-        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=green)       # heading direction
-        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)    # steering direction
+        plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
 
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))

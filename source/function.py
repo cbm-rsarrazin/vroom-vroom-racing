@@ -51,8 +51,11 @@ def reward_function(params):
     heading = nor(heading)
     print("heading: " + str(heading))
 
+    steering = nor(heading + steering_angle)
+    print("steering: " + str(steering))
+
     # compute angle diff
-    angle_diff = math.fabs(angle_min_diff(heading, best_dir))
+    angle_diff = math.fabs(angle_min_diff(steering, best_dir))
     print("diff: " + str(angle_diff))
 
     # reward computing for best dir
