@@ -3,7 +3,7 @@ def reward_function(params):
 
     reward = 0
     score_except = 20
-    score_max = 5
+    score_max = 10
 
     progress = params['progress']
     steering_angle = params['steering_angle']
@@ -56,8 +56,8 @@ def reward_function(params):
     print("diff: " + str(angle_diff))
 
     # reward computing for best dir
-    ratio = round(pow(float(1 - angle_diff / 180), 2), 1)
-    reward += score_max * ratio
+    ratio = pow(float(1 - angle_diff / 180), 2)
+    reward += round(score_max * ratio, 1)
     # reward computing for progress
     if progress == 100:
         reward += 5 * score_except

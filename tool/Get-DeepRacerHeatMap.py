@@ -229,6 +229,7 @@ hx = []
 hy = []
 tx = []
 ty = []
+rewards = []
 for i in range(len(coords)):
     coord = coords[i]
 
@@ -243,6 +244,9 @@ for i in range(len(coords)):
     heading_x = heading_point[0]
     heading_y = heading_point[1]
 
+    if reward not in rewards:
+        rewards.append(reward)
+
     if reward >= 3 and i % 1000 == 0:
         vx.append(vehicle_x)
         vy.append(vehicle_y)
@@ -251,10 +255,12 @@ for i in range(len(coords)):
         tx.append(vehicle_target_x)
         ty.append(vehicle_target_y)
 
-        plt.scatter(vehicle_x, vehicle_y, c=(0, 0, 1, 0.5))                                          # vehicle position
-        plt.scatter(vehicle_target_x, vehicle_target_y, c=(0, 1, 0, 0.5))                            # target position
-        plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 1, 0, 0.5))     # best direction
-        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=(1, 0, 0, 0.5))                   # current direction
+        plt.scatter(vehicle_x, vehicle_y, c=(0, 0, 1))                                          # vehicle position
+        plt.scatter(vehicle_target_x, vehicle_target_y, c=(0, 1, 0))                            # target position
+        plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 1, 0))     # best direction
+        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=(1, 0, 0))                   # current direction
+
+print(sorted(rewards))
 
 # center
 codes, verts = zip(*string_path_data[0])
