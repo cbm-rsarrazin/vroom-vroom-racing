@@ -15,14 +15,13 @@ def reward_function(params):
 
     x = params['x']
     y = params['y']
-    source_idx = closest_waypoints[0]  # closest before car
+    source_idx = closest_waypoints[0]
     target_idx = source_idx + 2
 
     # algorithm to find the farest visible waypoints
     loop = True
     while loop:
         if source_idx == target_idx:
-            # all waypoints has been checked
             return -score_except
 
         target = waypoints[target_idx % len(waypoints)]
@@ -38,24 +37,20 @@ def reward_function(params):
             target_idx = target_idx + 1
         else:
             target_idx = target_idx - 3
-            # then exit the loop
 
     target = waypoints[target_idx % len(waypoints)]
     print("target: " + str(target))
 
-    # angle from car to the farest visible waypoint
-    best_dir = atan2_deg(x, y, target[0], target[1])
-    best_dir = nor(best_dir)
+    best_dir = nor(atan2_deg(x, y, target[0], target[1]))
     print("best dir: " + str(best_dir))
 
     heading = nor(heading)
     print("heading: " + str(heading))
 
-    steering = nor(heading + steering_angle)
-    print("steering: " + str(steering))
+    predicted_angle = nor(heading + 2 * steering_angle / 3)
+    print("predicted angle: " + str(predicted_angle))
 
-    # compute angle diff
-    angle_diff = math.fabs(angle_min_diff(steering, best_dir))
+    angle_diff = math.fabs(angle_min_diff(predicted_angle, best_dir))
     print("diff: " + str(angle_diff))
 
     # reward computing for best dir
@@ -67,7 +62,7 @@ def reward_function(params):
         reward += 5 * score_except
 
     log(waypoints, closest_waypoints, track_width, steering_angle,
-        steps, x, y, target[0], target[1], best_dir, reward)
+        steps, x, y, target[0], target[1], best_dir, reward, predicted_angle)
 
     return reward
 
@@ -123,7 +118,8 @@ def nor(angle):
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
-        vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_best_dir, reward):
+        vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_best_dir,
+        reward, predicted_angle):
 
     import math
     coord0 = waypoints[closest_waypoints[0]]
@@ -142,7 +138,8 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
           "vehicle_target_x:{},"
           "vehicle_target_y:{},"
           "vehicle_best_dir:{},"
-          "reward:{}".format(
+          "reward:{},"
+          "predicted_angle:{}".format(
             closest_waypoints[0],
             coord0[0], coord0[1],
             mydegrees,
@@ -152,4 +149,5 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
             vehicle_x, vehicle_y,
             vehicle_target_x, vehicle_target_y,
             vehicle_best_dir,
-            reward))
+            reward,
+            predicted_angle))
