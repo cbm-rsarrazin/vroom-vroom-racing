@@ -1,11 +1,12 @@
-import boto3
-import datetime
-import re
-import math
-import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-import matplotlib.patches as mpatches
 import argparse
+import datetime
+import math
+import random
+
+import boto3
+import matplotlib.patches as mpatches
+import matplotlib.path as mpath
+import matplotlib.pyplot as plt
 
 # args
 parser = argparse.ArgumentParser(description='Generate a Deepracer Heatmap')
@@ -192,7 +193,12 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     return center_string_path_data, inside_string_path_data, outside_string_path_data, coords
 
 
+def get_point_from_angle(x, y, angle_deg, dist):
+    angle_rad = math.radians(angle_deg)
+    return x + (dist * math.cos(angle_rad)), y + (dist * math.sin(angle_rad))
+
 # MAIN
+
 
 session = boto3.Session(profile_name=profile, region_name=region)
 
@@ -216,31 +222,39 @@ string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeep
 coords = list(string_path_data[3])
 print('coords number: ' + str(len(coords)))
 
-# vehicle position
+# vehicle position + heading
 vx = []
 vy = []
+hx = []
+hy = []
+tx = []
+ty = []
 for i in range(len(coords)):
-    if i % 1 == 0:
-        coord = coords[i]
+    coord = coords[i]
 
-        vx.append(coord['vehicle_x'])
-        vy.append(coord['vehicle_y'])
+    vehicle_x = coord['vehicle_x']
+    vehicle_y = coord['vehicle_y']
+    vehicle_target_x = coord['vehicle_target_x']
+    vehicle_target_y = coord['vehicle_target_y']
+    reward = coord['reward']
+    heading = coord['heading']
 
-plt.scatter(vx, vy, c=(0, 0, 1, 0.03))
+    heading_point = get_point_from_angle(vehicle_x, vehicle_y, heading, 0.5)
+    heading_x = heading_point[0]
+    heading_y = heading_point[1]
 
-# line target
-# for i in range(len(coords)):
-#     if i % 5000 == 0:
-#         coord = coords[i]
-#
-#         vehicle_x = coord['vehicle_x']
-#         vehicle_y = coord['vehicle_y']
-#         vehicle_target_x = coord['vehicle_target_x']
-#         vehicle_target_y = coord['vehicle_target_y']
-#
-#         plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 0, 1))
-#         plt.scatter(vehicle_x, vehicle_y, c=(0, 1, 0))
-#         plt.scatter(vehicle_target_x, vehicle_target_y, c=(1, 0, 0))
+    if reward >= 3 and i % 1000 == 0:
+        vx.append(vehicle_x)
+        vy.append(vehicle_y)
+        hx.append(heading_x)
+        hy.append(heading_y)
+        tx.append(vehicle_target_x)
+        ty.append(vehicle_target_y)
+
+        plt.scatter(vehicle_x, vehicle_y, c=(0, 0, 1, 0.5))                                          # vehicle position
+        plt.scatter(vehicle_target_x, vehicle_target_y, c=(0, 1, 0, 0.5))                            # target position
+        plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 1, 0, 0.5))     # best direction
+        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=(1, 0, 0, 0.5))                   # current direction
 
 # center
 codes, verts = zip(*string_path_data[0])
