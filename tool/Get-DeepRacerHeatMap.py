@@ -260,7 +260,7 @@ for i in range(len(coords)):
         plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 1, 0))     # best direction
         plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=(1, 0, 0))                   # current direction
 
-print(sorted(rewards))
+print('rewards: ' + str(sorted(rewards)))
 
 # center
 codes, verts = zip(*string_path_data[0])
