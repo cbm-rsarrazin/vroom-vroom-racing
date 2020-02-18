@@ -136,12 +136,15 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         vehicle_target_y = float(commasplit[10].split(':')[1].strip())
         vehicle_best_dir = float(commasplit[11].split(':')[1].strip())
         reward = float(commasplit[12].split(':')[1].strip())
+        predicted_angle = float(commasplit[13].split(':')[1].strip())
+        vehicle_heading = float(commasplit[14].split(':')[1].strip())
 
         coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
-                 'steering': steering, 'steps':steps,
+                 'steering': steering, 'steps': steps,
                  'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
                  'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
-                 'vehicle_best_dir': vehicle_best_dir, 'reward': reward}
+                 'vehicle_best_dir': vehicle_best_dir, 'predicted_angle': predicted_angle,
+                 'reward': reward, 'vehicle_heading': vehicle_heading}
 
         coords.append(coord)
         # print("X: {}, Y: {}".format(x,y))
@@ -241,35 +244,37 @@ for i in range(len(coords)):
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
     reward = coord['reward']
-    heading = coord['heading']
+    vehicle_heading = coord['vehicle_heading']
     steering = coord['steering']
+    predicted_angle = coord['predicted_angle']
 
-    heading_point = get_point_from_angle(vehicle_x, vehicle_y, heading, 0.5)
-    heading_x = heading_point[0]
-    heading_y = heading_point[1]
+    vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
+    vehicle_heading_x = vehicle_heading_point[0]
+    vehicle_heading_y = vehicle_heading_point[1]
 
-    steering_point = get_point_from_angle(vehicle_x, vehicle_y, heading + steering, 0.5)
+    steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading + steering, 0.5)
     steering_x = steering_point[0]
     steering_y = steering_point[1]
+
+    predicted_angle_point = get_point_from_angle(vehicle_x, vehicle_y, predicted_angle, 0.5)
+    predicted_angle_x = predicted_angle_point[0]
+    predicted_angle_y = predicted_angle_point[1]
 
     if reward not in rewards:
         rewards.append(reward)
 
-    if reward >= 4 and i % 5000 == 0:
+    if reward >= 100:
         vx.append(vehicle_x)
         vy.append(vehicle_y)
-        hx.append(heading_x)
-        hy.append(heading_y)
+        hx.append(vehicle_heading_x)
+        hy.append(vehicle_heading_y)
         tx.append(target_x)
         ty.append(target_y)
 
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)           # target direction
-        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=green)       # heading direction
-        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)    # steering direction
-
-        plt.scatter(target_x, target_y, c=red)              # target position
-        plt.scatter(heading_x, heading_y, c=green)          # heading position
-        plt.scatter(steering_x, steering_y, c=yellow)       # steering position
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)                     # target direction
+        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], c=green)                   # heading direction
+        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)                # steering direction
+        plt.plot([vehicle_x, predicted_angle_x], [vehicle_y, predicted_angle_y], c=blue)    # predicted_angle direction
 
         plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
 

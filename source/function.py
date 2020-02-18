@@ -62,7 +62,7 @@ def reward_function(params):
         reward += 5 * score_except
 
     log(waypoints, closest_waypoints, track_width, steering_angle,
-        steps, x, y, target[0], target[1], best_dir, reward, predicted_angle)
+        steps, x, y, target[0], target[1], best_dir, reward, predicted_angle, heading)
 
     return reward
 
@@ -119,7 +119,7 @@ def nor(angle):
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
         vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_best_dir,
-        reward, predicted_angle):
+        reward, predicted_angle, heading):
 
     import math
     coord0 = waypoints[closest_waypoints[0]]
@@ -128,7 +128,8 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
     mydegrees = math.degrees(myradians)
 
     print("Waypoint0:{},"
-          "X:{},Y:{},"
+          "X:{},"
+          "Y:{},"
           "heading:{},"
           "trackwidth:{},"
           "steeringangle:{},"
@@ -139,15 +140,20 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
           "vehicle_target_y:{},"
           "vehicle_best_dir:{},"
           "reward:{},"
-          "predicted_angle:{}".format(
+          "predicted_angle:{},"
+          "vehicle_heading:{}".format(
             closest_waypoints[0],
-            coord0[0], coord0[1],
+            coord0[0],
+            coord0[1],
             mydegrees,
             track_width,
             steering_angle,
             steps,
-            vehicle_x, vehicle_y,
-            vehicle_target_x, vehicle_target_y,
+            vehicle_x,
+            vehicle_y,
+            vehicle_target_x,
+            vehicle_target_y,
             vehicle_best_dir,
             reward,
-            predicted_angle))
+            predicted_angle,
+            heading))
