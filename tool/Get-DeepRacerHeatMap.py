@@ -128,7 +128,8 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         y = float(commasplit[2].split(':')[1].strip())
         heading = float(commasplit[3].split(':')[1].strip())
         trackwidth = float(commasplit[4].split(':')[1].strip())
-
+        steering = float(commasplit[5].split(':')[1].strip())
+        steps = float(commasplit[6].split(':')[1].strip())
         vehicle_x = float(commasplit[7].split(':')[1].strip())
         vehicle_y = float(commasplit[8].split(':')[1].strip())
         vehicle_target_x = float(commasplit[9].split(':')[1].strip())
@@ -137,14 +138,13 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         reward = float(commasplit[12].split(':')[1].strip())
 
         coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
+                 'steering': steering, 'steps':steps,
                  'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
                  'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
                  'vehicle_best_dir': vehicle_best_dir, 'reward': reward}
 
         coords.append(coord)
         # print("X: {}, Y: {}".format(x,y))
-
-    print(len(coords))
 
     # print(len(coords))
     uniquewaypoints = list({v['waypoint']: v for v in coords}.values())  # get unique items in list of dicts
@@ -220,7 +220,10 @@ plt.ylabel('y axis')
 string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
 coords = list(string_path_data[3])
-print('coords number: ' + str(len(coords)))
+red = (1, 0, 0)
+green = (0, 1, 0)
+blue = (0, 0, 1)
+yellow = (1, 1, 0)
 
 # vehicle position + heading
 vx = []
@@ -235,14 +238,19 @@ for i in range(len(coords)):
 
     vehicle_x = coord['vehicle_x']
     vehicle_y = coord['vehicle_y']
-    vehicle_target_x = coord['vehicle_target_x']
-    vehicle_target_y = coord['vehicle_target_y']
+    target_x = coord['vehicle_target_x']
+    target_y = coord['vehicle_target_y']
     reward = coord['reward']
     heading = coord['heading']
+    steering = coord['steering']
 
     heading_point = get_point_from_angle(vehicle_x, vehicle_y, heading, 0.5)
     heading_x = heading_point[0]
     heading_y = heading_point[1]
+
+    steering_point = get_point_from_angle(vehicle_x, vehicle_y, steering, 0.5)
+    steering_x = steering_point[0]
+    steering_y = steering_point[1]
 
     if reward not in rewards:
         rewards.append(reward)
@@ -252,15 +260,21 @@ for i in range(len(coords)):
         vy.append(vehicle_y)
         hx.append(heading_x)
         hy.append(heading_y)
-        tx.append(vehicle_target_x)
-        ty.append(vehicle_target_y)
+        tx.append(target_x)
+        ty.append(target_y)
 
-        plt.scatter(vehicle_x, vehicle_y, c=(0, 0, 1))                                          # vehicle position
-        plt.scatter(vehicle_target_x, vehicle_target_y, c=(0, 1, 0))                            # target position
-        plt.plot([vehicle_x, vehicle_target_x], [vehicle_y, vehicle_target_y], c=(0, 1, 0))     # best direction
-        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=(1, 0, 0))                   # current direction
+        plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
+
+        plt.scatter(target_x, target_y, c=red)              # target position
+        plt.scatter(heading_x, heading_y, c=green)          # heading position
+        plt.scatter(steering_x, steering_y, c=yellow)       # steering position
+
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)           # target direction
+        plt.plot([vehicle_x, heading_x], [vehicle_y, heading_y], c=green)       # heading direction
+        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)    # steering direction
 
 print('rewards: ' + str(sorted(rewards)))
+print('coords: ' + str(len(coords)))
 
 # center
 codes, verts = zip(*string_path_data[0])
