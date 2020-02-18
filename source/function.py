@@ -37,7 +37,7 @@ def reward_function(params):
         if loop:
             target_idx = target_idx + 1
         else:
-            target_idx = target_idx - 2
+            target_idx = target_idx - 3
             # then exit the loop
 
     target = waypoints[target_idx % len(waypoints)]
@@ -51,13 +51,17 @@ def reward_function(params):
     heading = nor(heading)
     print("heading: " + str(heading))
 
+    steering = nor(heading + steering_angle)
+    print("steering: " + str(steering))
+
     # compute angle diff
-    angle_diff = math.fabs(angle_min_diff(heading, best_dir))
+    angle_diff = math.fabs(angle_min_diff(steering, best_dir))
     print("diff: " + str(angle_diff))
 
     # reward computing for best dir
     ratio = pow(float(1 - angle_diff / 180), 2)
     reward += round(score_max * ratio, 1)
+
     # reward computing for progress
     if progress == 100:
         reward += 5 * score_except
