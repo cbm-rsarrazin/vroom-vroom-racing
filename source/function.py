@@ -46,7 +46,7 @@ def reward_function(params):
     steering = nor(heading + steering_angle)
     print("steering: " + str(steering))
 
-    predicted = nor(heading + steering_angle)
+    predicted = nor(heading + 1.0 * steering_angle)
     print("predicted: " + str(predicted))
 
     angle_diff = math.fabs(angle_min_diff(predicted, best_dir))
