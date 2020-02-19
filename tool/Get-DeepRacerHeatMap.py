@@ -1,7 +1,6 @@
 import argparse
 import datetime
 import math
-import random
 
 import boto3
 import matplotlib.patches as mpatches
@@ -119,9 +118,26 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         # print (nextToken)
 
     print(len(events))
+
     coords = []
     print('Parsing Waypoint Data...')
     for event in events:
+        # "Waypoint0:{},"
+        # "X:{},"
+        # "Y:{},"
+        # "heading:{},"
+        # "trackwidth:{},"
+        # "steering_angle:{},"
+        # "steps:{},"
+        # "vehicle_x:{},"
+        # "vehicle_y:{},"
+        # "vehicle_target_x:{},"
+        # "vehicle_target_y:{},"
+        # "vehicle_heading:{},"
+        # "vehicle_best_dir:{},"
+        # "vehicle_predicted:{},"
+        # "reward:{}"
+
         commasplit = event['message'].split(',')
         waypoint = int(commasplit[0].split(':')[1].strip())
         x = float(commasplit[1].split(':')[1].strip())
@@ -134,17 +150,19 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         vehicle_y = float(commasplit[8].split(':')[1].strip())
         vehicle_target_x = float(commasplit[9].split(':')[1].strip())
         vehicle_target_y = float(commasplit[10].split(':')[1].strip())
-        vehicle_best_dir = float(commasplit[11].split(':')[1].strip())
-        reward = float(commasplit[12].split(':')[1].strip())
-        predicted_angle = float(commasplit[13].split(':')[1].strip())
-        vehicle_heading = float(commasplit[14].split(':')[1].strip())
+        vehicle_heading = float(commasplit[11].split(':')[1].strip())
+        vehicle_best_dir = float(commasplit[12].split(':')[1].strip())
+        vehicle_steering = float(commasplit[13].split(':')[1].strip())
+        vehicle_predicted = float(commasplit[14].split(':')[1].strip())
+        reward = float(commasplit[15].split(':')[1].strip())
 
         coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
                  'steering': steering, 'steps': steps,
                  'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
                  'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
-                 'vehicle_best_dir': vehicle_best_dir, 'predicted_angle': predicted_angle,
-                 'reward': reward, 'vehicle_heading': vehicle_heading}
+                 'vehicle_heading': vehicle_heading, 'vehicle_best_dir': vehicle_best_dir,
+                 'vehicle_predicted': vehicle_predicted, 'vehicle_steering': vehicle_steering,
+                 'reward': reward}
 
         coords.append(coord)
         # print("X: {}, Y: {}".format(x,y))
@@ -229,54 +247,54 @@ blue = (0, 0, 1)
 yellow = (1, 1, 0)
 
 # vehicle position + heading
-vx = []
-vy = []
-hx = []
-hy = []
-tx = []
-ty = []
 rewards = []
 for i in range(len(coords)):
     coord = coords[i]
+
+# coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
+#          'steering': steering, 'steps': steps,
+#          'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
+#          'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
+#          'vehicle_heading': vehicle_heading, 'vehicle_best_dir': vehicle_best_dir,
+#          'vehicle_predicted': vehicle_predicted, 'reward': reward}
 
     vehicle_x = coord['vehicle_x']
     vehicle_y = coord['vehicle_y']
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
-    reward = coord['reward']
     vehicle_heading = coord['vehicle_heading']
-    steering = coord['steering']
-    predicted_angle = coord['predicted_angle']
+    vehicle_best_dir = coord['vehicle_best_dir']
+    vehicle_steering = coord['vehicle_steering']
+    vehicle_predicted = coord['vehicle_predicted']
+    reward = coord['reward']
 
     vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
     vehicle_heading_x = vehicle_heading_point[0]
     vehicle_heading_y = vehicle_heading_point[1]
 
-    steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading + steering, 0.5)
-    steering_x = steering_point[0]
-    steering_y = steering_point[1]
+    vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
+    vehicle_best_dir_x = vehicle_best_dir_point[0]
+    vehicle_best_dir_y = vehicle_best_dir_point[1]
 
-    predicted_angle_point = get_point_from_angle(vehicle_x, vehicle_y, predicted_angle, 0.5)
-    predicted_angle_x = predicted_angle_point[0]
-    predicted_angle_y = predicted_angle_point[1]
+    vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
+    vehicle_steering_x = vehicle_steering_point[0]
+    vehicle_steering_y = vehicle_steering_point[1]
+
+    vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
+    vehicle_predicted_x = vehicle_predicted_point[0]
+    vehicle_predicted_y = vehicle_predicted_point[1]
 
     if reward not in rewards:
         rewards.append(reward)
 
     if reward >= 100:
-        vx.append(vehicle_x)
-        vy.append(vehicle_y)
-        hx.append(vehicle_heading_x)
-        hy.append(vehicle_heading_y)
-        tx.append(target_x)
-        ty.append(target_y)
-
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)                     # target direction
-        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], c=green)                   # heading direction
-        plt.plot([vehicle_x, steering_x], [vehicle_y, steering_y], c=yellow)                # steering direction
-        plt.plot([vehicle_x, predicted_angle_x], [vehicle_y, predicted_angle_y], c=blue)    # predicted_angle direction
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)                           # target direction
+        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], c=green)       # heading direction
+        plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], c=yellow)  # steering direction
+        plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], c=blue)      # predicted direction
 
         plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
+        plt.scatter(target_x, target_y, c=blue)           # vehicle position
 
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
