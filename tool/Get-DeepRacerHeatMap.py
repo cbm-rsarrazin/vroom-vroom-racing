@@ -122,22 +122,6 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     coords = []
     print('Parsing Waypoint Data...')
     for event in events:
-        # "Waypoint0:{},"
-        # "X:{},"
-        # "Y:{},"
-        # "heading:{},"
-        # "trackwidth:{},"
-        # "steering_angle:{},"
-        # "steps:{},"
-        # "vehicle_x:{},"
-        # "vehicle_y:{},"
-        # "vehicle_target_x:{},"
-        # "vehicle_target_y:{},"
-        # "vehicle_heading:{},"
-        # "vehicle_best_dir:{},"
-        # "vehicle_predicted:{},"
-        # "reward:{}"
-
         commasplit = event['message'].split(',')
         waypoint = int(commasplit[0].split(':')[1].strip())
         x = float(commasplit[1].split(':')[1].strip())
