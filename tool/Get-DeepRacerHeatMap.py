@@ -246,7 +246,7 @@ for i in range(len(coords)):
     if reward not in rewards:
         rewards.append(reward)
 
-    if reward <= 100 and i % 10000:
+    if reward <= 100 and i % 10000 == 0:
         vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
         vehicle_heading_x = vehicle_heading_point[0]
         vehicle_heading_y = vehicle_heading_point[1]
