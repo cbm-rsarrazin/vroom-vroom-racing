@@ -52,7 +52,7 @@ def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
         events += response['events']
         count += len(response['events'])
         print(count)
-        
+
         # while
         if 'nextToken' not in response.keys():
             print('Data Collected...')
@@ -107,7 +107,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         events += response['events']
         count += len(response['events'])
         print(count)
-        
+
         # while
         if 'nextToken' not in response.keys():
             print('End')
@@ -122,22 +122,6 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     coords = []
     print('Parsing Waypoint Data...')
     for event in events:
-        # "Waypoint0:{},"
-        # "X:{},"
-        # "Y:{},"
-        # "heading:{},"
-        # "trackwidth:{},"
-        # "steering_angle:{},"
-        # "steps:{},"
-        # "vehicle_x:{},"
-        # "vehicle_y:{},"
-        # "vehicle_target_x:{},"
-        # "vehicle_target_y:{},"
-        # "vehicle_heading:{},"
-        # "vehicle_best_dir:{},"
-        # "vehicle_predicted:{},"
-        # "reward:{}"
-
         commasplit = event['message'].split(',')
         waypoint = int(commasplit[0].split(':')[1].strip())
         x = float(commasplit[1].split(':')[1].strip())
@@ -190,7 +174,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x'] + (waypoint['trackwidth']/2) * math.cos(math.radians(waypoint['heading']+90))
-        y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']+90))   
+        y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']+90))
         if firstwaypoint:
             inside_string_path_data.append((mpath.Path.MOVETO, (x, y)))
         else:
@@ -203,7 +187,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     firstwaypoint = True
     for waypoint in uniquewaypoints:
         x = waypoint['x'] + (waypoint['trackwidth']/2) * math.cos(math.radians(waypoint['heading']-90))
-        y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']-90))   
+        y = waypoint['y'] + (waypoint['trackwidth']/2) * math.sin(math.radians(waypoint['heading']-90))
         if firstwaypoint:
             outside_string_path_data.append((mpath.Path.MOVETO, (x, y)))
         else:
@@ -241,60 +225,61 @@ plt.ylabel('y axis')
 string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
 coords = list(string_path_data[3])
-red = (1, 0, 0)
-green = (0, 1, 0)
-blue = (0, 0, 1)
-yellow = (1, 1, 0)
 
 # vehicle position + heading
 rewards = []
+
+# direction
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     target_x = coord['vehicle_target_x']
+#     target_y = coord['vehicle_target_y']
+#     vehicle_heading = coord['vehicle_heading']
+#     vehicle_best_dir = coord['vehicle_best_dir']
+#     vehicle_steering = coord['vehicle_steering']
+#     vehicle_predicted = coord['vehicle_predicted']
+#     reward = coord['reward']
+#
+#     if reward not in rewards:
+#         rewards.append(reward)
+#
+#     if reward <= 100 and i % 10000 == 0:
+#         vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
+#         vehicle_heading_x = vehicle_heading_point[0]
+#         vehicle_heading_y = vehicle_heading_point[1]
+#
+#         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
+#         vehicle_best_dir_x = vehicle_best_dir_point[0]
+#         vehicle_best_dir_y = vehicle_best_dir_point[1]
+#
+#         vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
+#         vehicle_steering_x = vehicle_steering_point[0]
+#         vehicle_steering_y = vehicle_steering_point[1]
+#
+#         vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
+#         vehicle_predicted_x = vehicle_predicted_point[0]
+#         vehicle_predicted_y = vehicle_predicted_point[1]
+#
+#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
+#         plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
+#         plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], color='yellow')
+#         plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], color='blue')
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
+#         plt.scatter(target_x, target_y, color='red')          # target position
+
+# repartition
 for i in range(len(coords)):
-    coord = coords[i]
+    if i % 3 == 0:
+        coord = coords[i]
 
-# coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
-#          'steering': steering, 'steps': steps,
-#          'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
-#          'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
-#          'vehicle_heading': vehicle_heading, 'vehicle_best_dir': vehicle_best_dir,
-#          'vehicle_predicted': vehicle_predicted, 'reward': reward}
+        vehicle_x = coord['vehicle_x']
+        vehicle_y = coord['vehicle_y']
 
-    vehicle_x = coord['vehicle_x']
-    vehicle_y = coord['vehicle_y']
-    target_x = coord['vehicle_target_x']
-    target_y = coord['vehicle_target_y']
-    vehicle_heading = coord['vehicle_heading']
-    vehicle_best_dir = coord['vehicle_best_dir']
-    vehicle_steering = coord['vehicle_steering']
-    vehicle_predicted = coord['vehicle_predicted']
-    reward = coord['reward']
-
-    vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
-    vehicle_heading_x = vehicle_heading_point[0]
-    vehicle_heading_y = vehicle_heading_point[1]
-
-    vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
-    vehicle_best_dir_x = vehicle_best_dir_point[0]
-    vehicle_best_dir_y = vehicle_best_dir_point[1]
-
-    vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
-    vehicle_steering_x = vehicle_steering_point[0]
-    vehicle_steering_y = vehicle_steering_point[1]
-
-    vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
-    vehicle_predicted_x = vehicle_predicted_point[0]
-    vehicle_predicted_y = vehicle_predicted_point[1]
-
-    if reward not in rewards:
-        rewards.append(reward)
-
-    if reward >= 100:
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], c=red)                           # target direction
-        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], c=green)       # heading direction
-        plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], c=yellow)  # steering direction
-        plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], c=blue)      # predicted direction
-
-        plt.scatter(vehicle_x, vehicle_y, c=blue)           # vehicle position
-        plt.scatter(target_x, target_y, c=blue)           # vehicle position
+        plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
 
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
