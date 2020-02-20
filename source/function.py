@@ -6,10 +6,10 @@ def reward_function(params):
 
     # parameters
     prediction_weight = 0.8
-    distance_max = 10
+    distance_max = 8
     speed_max = 3
-    score_max_distance_speed = 2
-    score_max_angle_diff = 6
+    score_max_distance_speed = 1
+    score_max_angle_diff = 5
     score_max_race_complete = 100
 
     progress = params['progress']
@@ -174,23 +174,23 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "vehicle_distance_ratio:{},"
           "vehicle_speed_max:{},"
           "vehicle_speed_ratio:{},".format(
-            closest_waypoints[0],
-            coord0[0],
-            coord0[1],
-            mydegrees,
-            track_width,
-            steering_angle,
-            steps,
-            reward,
-            vehicle_x,
-            vehicle_y,
-            vehicle_target_x,
-            vehicle_target_y,
-            vehicle_heading,
-            vehicle_best_dir,
-            vehicle_steering,
-            vehicle_predicted,
-            distance_max,
-            distance_ratio,
-            speed_max,
-            speed_ratio))
+        closest_waypoints[0],
+        coord0[0],
+        coord0[1],
+        mydegrees,
+        track_width,
+        steering_angle,
+        steps,
+        reward,
+        vehicle_x,
+        vehicle_y,
+        vehicle_target_x,
+        vehicle_target_y,
+        vehicle_heading,
+        vehicle_best_dir,
+        vehicle_steering,
+        vehicle_predicted,
+        distance_max,
+        distance_ratio,
+        speed_max,
+        speed_ratio))
