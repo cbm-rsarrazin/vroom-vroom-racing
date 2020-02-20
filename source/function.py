@@ -29,7 +29,7 @@ def reward_function(params):
     target_idx = source_idx + 5
 
     if is_crashed or is_offtrack or is_reversed:
-        return 0
+        return 0.0
 
     # algorithm to find the farest visible waypoints
     loop = True
