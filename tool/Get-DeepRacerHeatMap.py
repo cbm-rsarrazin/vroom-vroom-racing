@@ -230,56 +230,56 @@ coords = list(string_path_data[3])
 rewards = []
 
 # direction
-for i in range(len(coords)):
-    coord = coords[i]
-
-    vehicle_x = coord['vehicle_x']
-    vehicle_y = coord['vehicle_y']
-    target_x = coord['vehicle_target_x']
-    target_y = coord['vehicle_target_y']
-    vehicle_heading = coord['vehicle_heading']
-    vehicle_best_dir = coord['vehicle_best_dir']
-    vehicle_steering = coord['vehicle_steering']
-    vehicle_predicted = coord['vehicle_predicted']
-    reward = coord['reward']
-
-    if reward not in rewards:
-        rewards.append(reward)
-
-    if reward <= 100 and i % 10000 == 0:
-        vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
-        vehicle_heading_x = vehicle_heading_point[0]
-        vehicle_heading_y = vehicle_heading_point[1]
-
-        vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
-        vehicle_best_dir_x = vehicle_best_dir_point[0]
-        vehicle_best_dir_y = vehicle_best_dir_point[1]
-
-        vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
-        vehicle_steering_x = vehicle_steering_point[0]
-        vehicle_steering_y = vehicle_steering_point[1]
-
-        vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
-        vehicle_predicted_x = vehicle_predicted_point[0]
-        vehicle_predicted_y = vehicle_predicted_point[1]
-
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
-        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
-        plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], color='yellow')
-        plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], color='blue')
-
-        plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
-        plt.scatter(target_x, target_y, color='red')          # target position
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     target_x = coord['vehicle_target_x']
+#     target_y = coord['vehicle_target_y']
+#     vehicle_heading = coord['vehicle_heading']
+#     vehicle_best_dir = coord['vehicle_best_dir']
+#     vehicle_steering = coord['vehicle_steering']
+#     vehicle_predicted = coord['vehicle_predicted']
+#     reward = coord['reward']
+#
+#     if reward not in rewards:
+#         rewards.append(reward)
+#
+#     if reward <= 100 and i % 10000 == 0:
+#         vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
+#         vehicle_heading_x = vehicle_heading_point[0]
+#         vehicle_heading_y = vehicle_heading_point[1]
+#
+#         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
+#         vehicle_best_dir_x = vehicle_best_dir_point[0]
+#         vehicle_best_dir_y = vehicle_best_dir_point[1]
+#
+#         vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
+#         vehicle_steering_x = vehicle_steering_point[0]
+#         vehicle_steering_y = vehicle_steering_point[1]
+#
+#         vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
+#         vehicle_predicted_x = vehicle_predicted_point[0]
+#         vehicle_predicted_y = vehicle_predicted_point[1]
+#
+#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
+#         plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
+#         plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], color='yellow')
+#         plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], color='blue')
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
+#         plt.scatter(target_x, target_y, color='red')          # target position
 
 # repartition
-# for i in range(len(coords)):
-#     if i % 2 == 0:
-#         coord = coords[i]
-#
-#         vehicle_x = coord['vehicle_x']
-#         vehicle_y = coord['vehicle_y']
-#
-#         plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.02)
+for i in range(len(coords)):
+    if i % 3 == 0:
+        coord = coords[i]
+
+        vehicle_x = coord['vehicle_x']
+        vehicle_y = coord['vehicle_y']
+
+        plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
 
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
