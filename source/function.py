@@ -8,7 +8,7 @@ def reward_function(params):
     prediction_weight = 0.8
     distance_max = 40
     speed_max = 3
-    score_max_distance_speed = 1
+    score_max_distance_speed = 3
     score_max_angle_diff = 5
     score_max_race_complete = 150
 
