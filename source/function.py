@@ -5,12 +5,10 @@ def reward_function(params):
     import math
 
     # parameters
-    prediction_weight = 0.8
-    distance_max = 40
-    speed_max = 3
-    score_max_distance_speed = 3
+    prediction_weight = 1
+    speed_max = 2.8
     score_max_angle_diff = 5
-    score_max_race_complete = 150
+    score_max_race_complete = 100
 
     progress = params['progress']
     speed = params['speed']
@@ -44,32 +42,19 @@ def reward_function(params):
 
     target = waypoints[target_idx % len(waypoints)]
 
-    # speed ratio
     speed_ratio = speed / speed_max
-
-    # distance speed ratio
-    distance_target = target_idx - source_idx
-    if target_idx < source_idx:
-        distance_target = target_idx + (len(waypoints) - source_idx)
-    distance_ratio = min(distance_max, distance_target) / distance_max
-
-    best_speed_ratio = math.sqrt(distance_ratio)  # with: speed_ratio = distance_ratio ^ 2
-    distance_speed_ratio = pow(1 - abs(best_speed_ratio - speed_ratio), 2)
-
-    # direction diff ratio
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
     heading = nor(heading)
     steering = nor(heading + steering_angle)
 
     prediction_ratio = (1 - prediction_weight) + speed_ratio * prediction_weight
     predicted = nor(heading + prediction_ratio * steering_angle)
+
     angle_diff = math.fabs(angle_min_diff(predicted, best_dir))
     angle_diff_ratio = pow(float(1 - angle_diff / 180), 2)
 
     # reward
-    distance_speed_reward = round(score_max_distance_speed * distance_speed_ratio, 1)
-    angle_diff_reward = round(score_max_angle_diff * angle_diff_ratio, 1)
-    reward = distance_speed_reward + angle_diff_reward
+    reward = round(score_max_angle_diff * angle_diff_ratio, 1)
 
     if progress == 100:
         reward += score_max_race_complete
@@ -88,8 +73,8 @@ def reward_function(params):
         best_dir,
         steering,
         predicted,
-        distance_max,
-        distance_ratio,
+        0,
+        0,
         speed_max,
         speed_ratio)
 
@@ -174,23 +159,23 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "vehicle_distance_ratio:{},"
           "vehicle_speed_max:{},"
           "vehicle_speed_ratio:{},".format(
-        closest_waypoints[0],
-        coord0[0],
-        coord0[1],
-        mydegrees,
-        track_width,
-        steering_angle,
-        steps,
-        reward,
-        vehicle_x,
-        vehicle_y,
-        vehicle_target_x,
-        vehicle_target_y,
-        vehicle_heading,
-        vehicle_best_dir,
-        vehicle_steering,
-        vehicle_predicted,
-        distance_max,
-        distance_ratio,
-        speed_max,
-        speed_ratio))
+            closest_waypoints[0],
+            coord0[0],
+            coord0[1],
+            mydegrees,
+            track_width,
+            steering_angle,
+            steps,
+            reward,
+            vehicle_x,
+            vehicle_y,
+            vehicle_target_x,
+            vehicle_target_y,
+            vehicle_heading,
+            vehicle_best_dir,
+            vehicle_steering,
+            vehicle_predicted,
+            distance_max,
+            distance_ratio,
+            speed_max,
+            speed_ratio))
