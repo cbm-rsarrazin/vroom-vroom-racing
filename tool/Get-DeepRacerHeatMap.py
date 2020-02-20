@@ -123,6 +123,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
     print('Parsing Waypoint Data...')
     for event in events:
         commasplit = event['message'].split(',')
+
         waypoint = int(commasplit[0].split(':')[1].strip())
         x = float(commasplit[1].split(':')[1].strip())
         y = float(commasplit[2].split(':')[1].strip())
@@ -130,25 +131,40 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         trackwidth = float(commasplit[4].split(':')[1].strip())
         steering = float(commasplit[5].split(':')[1].strip())
         steps = float(commasplit[6].split(':')[1].strip())
-        vehicle_x = float(commasplit[7].split(':')[1].strip())
-        vehicle_y = float(commasplit[8].split(':')[1].strip())
-        vehicle_target_x = float(commasplit[9].split(':')[1].strip())
-        vehicle_target_y = float(commasplit[10].split(':')[1].strip())
-        vehicle_heading = float(commasplit[11].split(':')[1].strip())
-        vehicle_best_dir = float(commasplit[12].split(':')[1].strip())
-        vehicle_steering = float(commasplit[13].split(':')[1].strip())
-        vehicle_predicted = float(commasplit[14].split(':')[1].strip())
-        reward = float(commasplit[15].split(':')[1].strip())
+        reward = float(commasplit[7].split(':')[1].strip())
+        vehicle_x = float(commasplit[8].split(':')[1].strip())
+        vehicle_y = float(commasplit[9].split(':')[1].strip())
+        vehicle_target_x = float(commasplit[10].split(':')[1].strip())
+        vehicle_target_y = float(commasplit[11].split(':')[1].strip())
+        vehicle_heading = float(commasplit[12].split(':')[1].strip())
+        vehicle_best_dir = float(commasplit[13].split(':')[1].strip())
+        vehicle_steering = float(commasplit[14].split(':')[1].strip())
+        vehicle_predicted = float(commasplit[15].split(':')[1].strip())
+        vehicle_distance_max = float(commasplit[16].split(':')[1].strip())
+        vehicle_distance_ratio = float(commasplit[17].split(':')[1].strip())
+        vehicle_speed_max = float(commasplit[18].split(':')[1].strip())
+        vehicle_speed_ratio = float(commasplit[19].split(':')[1].strip())
 
-        coord = {'waypoint': waypoint, 'x': x, 'y': y, 'heading': heading, 'trackwidth': trackwidth,
-                 'steering': steering, 'steps': steps,
-                 'vehicle_x': vehicle_x, 'vehicle_y': vehicle_y,
-                 'vehicle_target_x': vehicle_target_x, 'vehicle_target_y': vehicle_target_y,
-                 'vehicle_heading': vehicle_heading, 'vehicle_best_dir': vehicle_best_dir,
-                 'vehicle_predicted': vehicle_predicted, 'vehicle_steering': vehicle_steering,
-                 'reward': reward}
-
-        coords.append(coord)
+        coords.append({'waypoint': waypoint,
+                       'x': x,
+                       'y': y,
+                       'heading': heading,
+                       'trackwidth': trackwidth,
+                       'steering': steering,
+                       'steps': steps,
+                       'reward': reward,
+                       'vehicle_x': vehicle_x,
+                       'vehicle_y': vehicle_y,
+                       'vehicle_target_x': vehicle_target_x,
+                       'vehicle_target_y': vehicle_target_y,
+                       'vehicle_heading': vehicle_heading,
+                       'vehicle_best_dir': vehicle_best_dir,
+                       'vehicle_steering': vehicle_steering,
+                       'vehicle_predicted': vehicle_predicted,
+                       'vehicle_distance_max': vehicle_distance_max,
+                       'vehicle_distance_ratio': vehicle_distance_ratio,
+                       'vehicle_speed_max': vehicle_speed_max,
+                       'vehicle_speed_ratio': vehicle_speed_ratio})
         # print("X: {}, Y: {}".format(x,y))
 
     # print(len(coords))
@@ -233,6 +249,7 @@ rewards = []
 # for i in range(len(coords)):
 #     coord = coords[i]
 #
+#     reward = coord['reward']
 #     vehicle_x = coord['vehicle_x']
 #     vehicle_y = coord['vehicle_y']
 #     target_x = coord['vehicle_target_x']
@@ -241,7 +258,6 @@ rewards = []
 #     vehicle_best_dir = coord['vehicle_best_dir']
 #     vehicle_steering = coord['vehicle_steering']
 #     vehicle_predicted = coord['vehicle_predicted']
-#     reward = coord['reward']
 #
 #     if reward not in rewards:
 #         rewards.append(reward)

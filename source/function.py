@@ -1,10 +1,19 @@
+import math
+
+
 def reward_function(params):
     import math
 
-    score_exc = 20
-    score_max = 5
+    # parameters
+    prediction_weight = 0.8
+    distance_max = 10
+    speed_max = 3
+    score_max_distance_speed = 2
+    score_max_angle_diff = 6
+    score_max_race_complete = 100
 
     progress = params['progress']
+    speed = params['speed']
     steering_angle = params['steering_angle']
     steps = params['steps']
     track_width = params['track_width']
@@ -15,7 +24,7 @@ def reward_function(params):
     x = params['x']
     y = params['y']
     source_idx = closest_waypoints[0]
-    target_idx = source_idx + 2
+    target_idx = source_idx + 4
 
     # algorithm to find the farest visible waypoints
     loop = True
@@ -24,8 +33,7 @@ def reward_function(params):
 
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
-            if (dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2,
-                                                                                      track_width / 2)):
+            if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
                 loop = False
                 break
 
@@ -35,48 +43,60 @@ def reward_function(params):
             target_idx = target_idx - 3
 
     target = waypoints[target_idx % len(waypoints)]
-    print("target: " + str(target))
 
+    # speed ratio
+    speed_ratio = speed / speed_max
+
+    # distance speed ratio
+    distance_target = target_idx - source_idx
+    if target_idx < source_idx:
+        distance_target = target_idx + (len(waypoints) - source_idx)
+    distance_ratio = min(distance_max, distance_target) / distance_max
+
+    best_speed_ratio = math.sqrt(distance_ratio)  # with: speed_ratio = distance_ratio ^ 2
+    distance_speed_ratio = pow(1 - abs(best_speed_ratio - speed_ratio), 2)
+
+    # direction diff ratio
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
-    print("best dir: " + str(best_dir))
-
     heading = nor(heading)
-    print("heading: " + str(heading))
-
     steering = nor(heading + steering_angle)
-    print("steering: " + str(steering))
 
-    predicted = nor(heading + 0.5 * steering_angle)
-    print("predicted: " + str(predicted))
-
+    prediction_ratio = (1 - prediction_weight) + speed_ratio * prediction_weight
+    predicted = nor(heading + prediction_ratio * steering_angle)
     angle_diff = math.fabs(angle_min_diff(predicted, best_dir))
-    print("diff: " + str(angle_diff))
+    angle_diff_ratio = pow(float(1 - angle_diff / 180), 2)
 
-    # reward computing for best dir
-    ratio = pow(float(1 - angle_diff / 180), 2)
-    reward = round(score_max * ratio, 1)
+    # reward
+    distance_speed_reward = round(score_max_distance_speed * distance_speed_ratio, 1)
+    angle_diff_reward = round(score_max_angle_diff * angle_diff_ratio, 1)
+    reward = distance_speed_reward + angle_diff_reward
 
-    # reward computing for progress
     if progress == 100:
-        reward += 5 * score_exc
+        reward += score_max_race_complete
 
     log(waypoints,
         closest_waypoints,
         track_width,
         steering_angle,
         steps,
-        x, y,
-        target[0], target[1],
-        heading, best_dir,
-        steering, predicted,
-        reward)
+        reward,
+        x,
+        y,
+        target[0],
+        target[1],
+        heading,
+        best_dir,
+        steering,
+        predicted,
+        distance_max,
+        distance_ratio,
+        speed_max,
+        speed_ratio)
 
     return reward
 
 
 def dps(px, py, x1, y1, x2, y2):
-    import math
-
     mag = math.hypot(x2 - x1, y2 - y1)
 
     if mag < 0.00000001:
@@ -111,7 +131,6 @@ def angle_min_diff(x, y):
 
 
 def atan2_deg(x1, y1, x2, y2):
-    import math
     rad = math.atan2(y2 - y1, x2 - x1)
     deg = math.degrees(rad)
     return nor(deg)
@@ -124,9 +143,10 @@ def nor(angle):
     return angle
 
 
-def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
+def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
         vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_heading,
-        vehicle_best_dir, vehicle_steering, vehicle_predicted, reward):
+        vehicle_best_dir, vehicle_steering, vehicle_predicted, distance_max,
+        distance_ratio, speed_max, speed_ratio):
 
     import math
     coord0 = waypoints[closest_waypoints[0]]
@@ -141,6 +161,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
           "trackwidth:{},"
           "steering_angle:{},"
           "steps:{},"
+          "reward:{},"
           "vehicle_x:{},"
           "vehicle_y:{},"
           "vehicle_target_x:{},"
@@ -149,7 +170,10 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
           "vehicle_best_dir:{},"
           "vehicle_steering:{},"
           "vehicle_predicted:{},"
-          "reward:{}".format(
+          "vehicle_distance_max:{},"
+          "vehicle_distance_ratio:{},"
+          "vehicle_speed_max:{},"
+          "vehicle_speed_ratio:{},".format(
             closest_waypoints[0],
             coord0[0],
             coord0[1],
@@ -157,6 +181,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
             track_width,
             steering_angle,
             steps,
+            reward,
             vehicle_x,
             vehicle_y,
             vehicle_target_x,
@@ -165,4 +190,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps,
             vehicle_best_dir,
             vehicle_steering,
             vehicle_predicted,
-            reward))
+            distance_max,
+            distance_ratio,
+            speed_max,
+            speed_ratio))
