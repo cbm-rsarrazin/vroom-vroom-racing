@@ -22,7 +22,7 @@ def reward_function(params):
     x = params['x']
     y = params['y']
     source_idx = closest_waypoints[0]
-    target_idx = source_idx + 4
+    target_idx = source_idx + 5
 
     # algorithm to find the farest visible waypoints
     loop = True
@@ -38,7 +38,7 @@ def reward_function(params):
         if loop:
             target_idx = target_idx + 1
         else:
-            target_idx = target_idx - 3
+            target_idx = target_idx - 4
 
     target = waypoints[target_idx % len(waypoints)]
 
