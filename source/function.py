@@ -7,9 +7,10 @@ def reward_function(params):
     # parameters
     prediction_weight = 0.75
     waypoint_view_min = 4
-    waypoint_view_max = 10
+    waypoint_view_max = 25
     speed_max = 2.7
-    score_max_angle_diff = 5
+    score_max_speed = 5
+    score_max_direction = 5
     score_max_race_complete = 100
 
     is_crashed = params['is_crashed']
@@ -64,9 +65,14 @@ def reward_function(params):
 
     angle_diff = math.fabs(angle_min_diff(predicted, best_dir))
     angle_diff_ratio = pow(float(1 - angle_diff / 180), 2)
+    direction_reward = round(score_max_direction * angle_diff_ratio, 1)
+
+    # best speed
+    distance_ratio = (target_idx - source_idx) / waypoint_view_max
+    speed_reward = round(score_max_speed * (1 - abs(distance_ratio - speed_ratio)), 1)
 
     # reward
-    reward = round(score_max_angle_diff * angle_diff_ratio, 1)
+    reward = direction_reward + speed_reward
 
     if progress == 100:
         reward += score_max_race_complete
