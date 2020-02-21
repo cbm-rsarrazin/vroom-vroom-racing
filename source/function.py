@@ -53,6 +53,8 @@ def reward_function(params):
     target = waypoints[target_idx % len(waypoints)]
 
     speed_ratio = speed / speed_max
+
+    # best dir
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
     heading = nor(heading)
     steering = nor(heading + steering_angle)
