@@ -5,16 +5,16 @@ def reward_function(params):
     import math
 
     # parameters
-    prediction_weight = 0.75
-    waypoint_view_min = 4
+    prediction_weight = 0.8
+    waypoint_view_min = 3
     waypoint_view_max = 15
-    speed_max = 2.7
-    score_max_speed = 5
+    speed_max = 2.6
     score_max_direction = 5
     score_max_race_complete = 100
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
+    is_reversed = params['is_reversed']
 
     progress = params['progress']
     speed = params['speed']
@@ -30,8 +30,8 @@ def reward_function(params):
     source_idx = closest_waypoints[0]
     target_idx = source_idx + waypoint_view_min
 
-    if is_crashed or is_offtrack:
-        return 0.0
+    if is_crashed or is_offtrack or is_reversed:
+        return -2.0
 
     # algorithm to find the farest visible waypoints
     loop = True
@@ -63,16 +63,12 @@ def reward_function(params):
     prediction_ratio = (1 - prediction_weight) + speed_ratio * prediction_weight
     predicted = nor(heading + prediction_ratio * steering_angle)
 
-    angle_diff = math.fabs(angle_min_diff(predicted, best_dir))
-    angle_diff_ratio = pow(float(1 - angle_diff / 180), 2)
-    direction_reward = round(score_max_direction * angle_diff_ratio, 1)
-
-    # best speed
-    distance_ratio = (target_idx - source_idx) / waypoint_view_max
-    speed_reward = round(score_max_speed * (1 - abs(distance_ratio - speed_ratio)), 1)
+    direction_diff = math.fabs(angle_min_diff(predicted, best_dir))
+    direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
+    direction_reward = round(score_max_direction * direction_diff_ratio, 1)
 
     # reward
-    reward = direction_reward + speed_reward
+    reward = direction_reward
 
     if progress == 100:
         reward += score_max_race_complete
