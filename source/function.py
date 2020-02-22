@@ -32,7 +32,7 @@ def reward_function(params):
     target_idx = source_idx + waypoint_view_min
 
     if is_crashed or is_offtrack or is_reversed:
-        return 0
+        return 0.0
 
     # algorithm to find the farest visible waypoints
     loop = True
@@ -72,7 +72,7 @@ def reward_function(params):
     reward = direction_reward
 
     if all_wheels_on_track:
-        reward += 2
+        reward += 2.0
 
     if progress == 100:
         reward += score_max_race_complete
