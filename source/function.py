@@ -9,7 +9,7 @@ def reward_function(params):
     waypoint_view_min = 4
     speed_max = 2.5
     score_max_direction = 5
-    score_max_race_complete = 30
+    score_max_race_complete = 20
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
