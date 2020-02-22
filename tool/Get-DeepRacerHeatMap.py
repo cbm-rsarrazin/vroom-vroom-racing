@@ -140,10 +140,9 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         vehicle_best_dir = float(commasplit[13].split(':')[1].strip())
         vehicle_steering = float(commasplit[14].split(':')[1].strip())
         vehicle_predicted = float(commasplit[15].split(':')[1].strip())
-        vehicle_distance_max = float(commasplit[16].split(':')[1].strip())
-        vehicle_distance_ratio = float(commasplit[17].split(':')[1].strip())
-        vehicle_speed_max = float(commasplit[18].split(':')[1].strip())
-        vehicle_speed_ratio = float(commasplit[19].split(':')[1].strip())
+        vehicle_speed = float(commasplit[16].split(':')[1].strip())
+        vehicle_speed_max = float(commasplit[17].split(':')[1].strip())
+        vehicle_speed_ratio = float(commasplit[18].split(':')[1].strip())
 
         coords.append({'waypoint': waypoint,
                        'x': x,
@@ -161,8 +160,7 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
                        'vehicle_best_dir': vehicle_best_dir,
                        'vehicle_steering': vehicle_steering,
                        'vehicle_predicted': vehicle_predicted,
-                       'vehicle_distance_max': vehicle_distance_max,
-                       'vehicle_distance_ratio': vehicle_distance_ratio,
+                       'vehicle_speed': vehicle_speed,
                        'vehicle_speed_max': vehicle_speed_max,
                        'vehicle_speed_ratio': vehicle_speed_ratio})
         # print("X: {}, Y: {}".format(x,y))
@@ -289,7 +287,7 @@ rewards = []
 
 # repartition
 for i in range(len(coords)):
-    if i % 10 == 0:
+    if i % 1 == 0:
         coord = coords[i]
 
         vehicle_x = coord['vehicle_x']

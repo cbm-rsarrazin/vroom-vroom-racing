@@ -6,11 +6,10 @@ def reward_function(params):
 
     # parameters
     prediction_weight = 0.7
-    waypoint_view_min = 3
-    waypoint_view_max = 10
-    speed_max = 2.6
+    waypoint_view_min = 4
+    speed_max = 2.5
     score_max_direction = 5
-    score_max_race_complete = 100
+    score_max_race_complete = 30
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
@@ -24,37 +23,21 @@ def reward_function(params):
     heading = params['heading']
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
-    all_wheels_on_track = params['all_wheels_on_track']
 
     x = params['x']
     y = params['y']
     source_idx = closest_waypoints[0]
-    target_idx = source_idx + waypoint_view_min
 
     if is_crashed or is_offtrack or is_reversed:
         return 0.0
 
-    # algorithm to find the farest visible waypoints
-    loop = True
-    while loop:
-        target = waypoints[target_idx % len(waypoints)]
+    speed_ratio = speed / speed_max
 
-        for i in range(source_idx + 1, target_idx):
-            current = waypoints[i % len(waypoints)]
-            if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
-                loop = False
-                break
-
-        target_idx = target_idx + 1
-        if target_idx - source_idx > waypoint_view_min + waypoint_view_max:
-            loop = False
-
-        if not loop:
-            target_idx = target_idx - waypoint_view_min
+    view_distance = compute_view_distance(x, y, source_idx, waypoints, track_width)
+    view_distance = max(waypoint_view_min, view_distance * (1 - speed_ratio))
+    target_idx = source_idx + view_distance
 
     target = waypoints[target_idx % len(waypoints)]
-
-    speed_ratio = speed / speed_max
 
     # best dir
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
@@ -70,9 +53,6 @@ def reward_function(params):
 
     # reward
     reward = direction_reward
-
-    if all_wheels_on_track:
-        reward += 2.0
 
     if progress == 100:
         reward += score_max_race_complete
@@ -91,12 +71,25 @@ def reward_function(params):
         best_dir,
         steering,
         predicted,
-        0,
-        0,
+        speed,
         speed_max,
         speed_ratio)
 
     return reward
+
+
+def compute_view_distance(x, y, source_idx, waypoints, track_width):
+    target_idx = source_idx + 2
+
+    while True:
+        target = waypoints[target_idx % len(waypoints)]
+
+        for i in range(source_idx + 1, target_idx):
+            current = waypoints[i % len(waypoints)]
+            if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
+                return source_idx - target_idx - 1
+
+        target_idx = target_idx + 1
 
 
 def dps(px, py, x1, y1, x2, y2):
@@ -148,8 +141,8 @@ def nor(angle):
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
         vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_heading,
-        vehicle_best_dir, vehicle_steering, vehicle_predicted, distance_max,
-        distance_ratio, speed_max, speed_ratio):
+        vehicle_best_dir, vehicle_steering, vehicle_predicted, speed, speed_max,
+        speed_ratio):
 
     import math
     coord0 = waypoints[closest_waypoints[0]]
@@ -173,8 +166,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "vehicle_best_dir:{},"
           "vehicle_steering:{},"
           "vehicle_predicted:{},"
-          "vehicle_distance_max:{},"
-          "vehicle_distance_ratio:{},"
+          "vehicle_speed:{},"
           "vehicle_speed_max:{},"
           "vehicle_speed_ratio:{},".format(
             closest_waypoints[0],
@@ -193,7 +185,6 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
             vehicle_best_dir,
             vehicle_steering,
             vehicle_predicted,
-            distance_max,
-            distance_ratio,
+            speed,
             speed_max,
             speed_ratio))
