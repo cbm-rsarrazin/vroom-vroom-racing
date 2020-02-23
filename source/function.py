@@ -34,7 +34,7 @@ def reward_function(params):
     speed_ratio = speed / speed_max
 
     view_distance = compute_view_distance(x, y, source_idx, waypoints, track_width)
-    target_idx = source_idx + max(waypoint_view_min, view_distance / 2 + view_distance * (1 - speed_ratio) / 2)
+    target_idx = source_idx + max(waypoint_view_min, view_distance * (1 - speed_ratio))
 
     target = waypoints[target_idx % len(waypoints)]
 
@@ -86,7 +86,7 @@ def compute_view_distance(x, y, source_idx, waypoints, track_width):
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
             if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
-                return source_idx - target_idx - 1
+                return target_idx - source_idx - 1
 
         target_idx = target_idx + 1
 

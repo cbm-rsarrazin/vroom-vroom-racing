@@ -254,18 +254,17 @@ for i in range(len(coords)):
     target_y = coord['vehicle_target_y']
     vehicle_view_distance = coord['vehicle_view_distance']
     vehicle_speed = coord['vehicle_speed']
-    vehicle_speed_max = coord['vehicle_speed_max']
     vehicle_heading = coord['vehicle_heading']
     vehicle_best_dir = coord['vehicle_best_dir']
     vehicle_steering = coord['vehicle_steering']
     vehicle_predicted = coord['vehicle_predicted']
 
-    print(str(vehicle_speed) + " / " + str(vehicle_speed_max))
+    print("test" + str(vehicle_view_distance))
 
     if reward not in rewards:
         rewards.append(reward)
 
-    if i % 1000 == 0:
+    if i % 100 == 0:
         vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
         vehicle_heading_x = vehicle_heading_point[0]
         vehicle_heading_y = vehicle_heading_point[1]
@@ -281,8 +280,6 @@ for i in range(len(coords)):
         vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
         vehicle_predicted_x = vehicle_predicted_point[0]
         vehicle_predicted_y = vehicle_predicted_point[1]
-
-        print();
 
         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
         plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
