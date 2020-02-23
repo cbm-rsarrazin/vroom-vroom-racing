@@ -6,8 +6,8 @@ def reward_function(params):
 
     # parameters
     prediction_weight = 0.7
-    waypoint_view_min = 4
-    waypoint_view_max = 30
+    waypoint_view_min = 5
+    waypoint_view_max = 15
     speed_max = 2.5
     score_max_direction = 5
     score_max_race_complete = 20
@@ -29,13 +29,11 @@ def reward_function(params):
     y = params['y']
     source_idx = closest_waypoints[0]
 
-    if is_crashed or is_offtrack or is_reversed:
-        return 0.0
-
     speed_ratio = speed / speed_max
 
+    # find target
     view_distance = compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_width)
-    target_idx = source_idx + max(waypoint_view_min, view_distance * (1 - speed_ratio))
+    target_idx = source_idx + max(waypoint_view_min, round(view_distance * (1 - speed_ratio)))
 
     target = waypoints[target_idx % len(waypoints)]
 
@@ -49,11 +47,12 @@ def reward_function(params):
 
     direction_diff = math.fabs(angle_min_diff(predicted, best_dir))
     direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
-    direction_reward = round(score_max_direction * direction_diff_ratio, 1)
 
     # reward
-    reward = direction_reward
+    reward = round(score_max_direction * direction_diff_ratio, 1)
 
+    if is_crashed or is_offtrack or is_reversed:
+        reward = 0.0
     if progress == 100:
         reward += score_max_race_complete
 
@@ -79,7 +78,8 @@ def reward_function(params):
 
 
 def compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_width):
-    target_idx = source_idx + 2
+    view_distance = 2
+    target_idx = source_idx + view_distance
 
     while True:
         target = waypoints[target_idx % len(waypoints)]
@@ -87,11 +87,12 @@ def compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
             if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
-                return target_idx - source_idx - 1
+                return view_distance
 
-        target_idx = target_idx + 1
-        if target_idx > waypoint_view_max:
-            return waypoint_view_max
+        view_distance = view_distance + 1
+        target_idx = source_idx + view_distance
+        if view_distance >= waypoint_view_max:
+            return view_distance
 
 
 def dps(px, py, x1, y1, x2, y2):
