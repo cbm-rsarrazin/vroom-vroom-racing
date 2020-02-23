@@ -7,6 +7,7 @@ def reward_function(params):
     # parameters
     prediction_weight = 0.7
     waypoint_view_min = 4
+    waypoint_view_max = 30
     speed_max = 2.5
     score_max_direction = 5
     score_max_race_complete = 20
@@ -33,7 +34,7 @@ def reward_function(params):
 
     speed_ratio = speed / speed_max
 
-    view_distance = compute_view_distance(x, y, source_idx, waypoints, track_width)
+    view_distance = compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_width)
     target_idx = source_idx + max(waypoint_view_min, view_distance * (1 - speed_ratio))
 
     target = waypoints[target_idx % len(waypoints)]
@@ -77,7 +78,7 @@ def reward_function(params):
     return reward
 
 
-def compute_view_distance(x, y, source_idx, waypoints, track_width):
+def compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_width):
     target_idx = source_idx + 2
 
     while True:
@@ -89,6 +90,8 @@ def compute_view_distance(x, y, source_idx, waypoints, track_width):
                 return target_idx - source_idx - 1
 
         target_idx = target_idx + 1
+        if target_idx > waypoint_view_max:
+            return waypoint_view_max
 
 
 def dps(px, py, x1, y1, x2, y2):
