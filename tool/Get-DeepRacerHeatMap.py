@@ -330,10 +330,10 @@ for i in range(len(coords)):
     average_view_distance += vehicle_view_distance
     average_target_distance += vehicle_target_distance
 
-    # print("- speed:" + str(vehicle_speed) +
-    #       ", speed_ratio:" + str(vehicle_speed_ratio) +
-    #       ", view_distance:" + str(vehicle_view_distance) +
-    #       ", target_distance:" + str(vehicle_target_distance))
+    print("- speed:" + str(vehicle_speed) +
+          ", speed_ratio:" + str(vehicle_speed_ratio) +
+          ", view_distance:" + str(vehicle_view_distance) +
+          ", target_distance:" + str(vehicle_target_distance))
 
     if i % 10000 == 0:
         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
