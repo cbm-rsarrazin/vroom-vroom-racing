@@ -245,7 +245,67 @@ coords = list(string_path_data[3])
 # vehicle position + heading
 rewards = []
 
+# repartition
+# for i in range(len(coords)):
+#     if i % 1000 == 0:
+#         coord = coords[i]
+#
+#         vehicle_x = coord['vehicle_x']
+#         vehicle_y = coord['vehicle_y']
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
+
 # direction
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     reward = coord['reward']
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     target_x = coord['vehicle_target_x']
+#     target_y = coord['vehicle_target_y']
+#     vehicle_target_distance = coord['vehicle_target_distance']
+#     vehicle_view_distance = coord['vehicle_view_distance']
+#     vehicle_speed = coord['vehicle_speed']
+#     vehicle_speed_ratio = coord['vehicle_speed_ratio']
+#     vehicle_heading = coord['vehicle_heading']
+#     vehicle_best_dir = coord['vehicle_best_dir']
+#     vehicle_steering = coord['vehicle_steering']
+#     vehicle_predicted = coord['vehicle_predicted']
+#
+#     if reward not in rewards:
+#         rewards.append(reward)
+#
+#     if i % 10000 == 0:
+#         vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
+#         vehicle_heading_x = vehicle_heading_point[0]
+#         vehicle_heading_y = vehicle_heading_point[1]
+#
+#         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
+#         vehicle_best_dir_x = vehicle_best_dir_point[0]
+#         vehicle_best_dir_y = vehicle_best_dir_point[1]
+#
+#         vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
+#         vehicle_steering_x = vehicle_steering_point[0]
+#         vehicle_steering_y = vehicle_steering_point[1]
+#
+#         vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
+#         vehicle_predicted_x = vehicle_predicted_point[0]
+#         vehicle_predicted_y = vehicle_predicted_point[1]
+#
+#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
+#         plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
+#         plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], color='yellow')
+#         plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], color='blue')
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
+#         plt.scatter(target_x, target_y, color='red')          # target position
+
+# speed
+average_speed = 0
+average_view_distance = 0
+average_target_distance = 0
+
 for i in range(len(coords)):
     coord = coords[i]
 
@@ -266,43 +326,35 @@ for i in range(len(coords)):
     if reward not in rewards:
         rewards.append(reward)
 
-    print("spd:" + str(vehicle_speed) + ", ratio:" + str(vehicle_speed_ratio) + ", dst:" + str(vehicle_view_distance))
+    average_speed += vehicle_speed
+    average_view_distance += vehicle_view_distance
+    average_target_distance += vehicle_target_distance
 
-    if i % 10 == 0:
-        vehicle_heading_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_heading, 0.5)
-        vehicle_heading_x = vehicle_heading_point[0]
-        vehicle_heading_y = vehicle_heading_point[1]
+    # print("- speed:" + str(vehicle_speed) +
+    #       ", speed_ratio:" + str(vehicle_speed_ratio) +
+    #       ", view_distance:" + str(vehicle_view_distance) +
+    #       ", target_distance:" + str(vehicle_target_distance))
 
-        vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, 0.5)
+    if i % 10000 == 0:
+        dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
+
+        vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
         vehicle_best_dir_x = vehicle_best_dir_point[0]
         vehicle_best_dir_y = vehicle_best_dir_point[1]
 
-        vehicle_steering_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_steering, 0.5)
-        vehicle_steering_x = vehicle_steering_point[0]
-        vehicle_steering_y = vehicle_steering_point[1]
-
-        vehicle_predicted_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_predicted, 0.5)
-        vehicle_predicted_x = vehicle_predicted_point[0]
-        vehicle_predicted_y = vehicle_predicted_point[1]
-
         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
-        plt.plot([vehicle_x, vehicle_heading_x], [vehicle_y, vehicle_heading_y], color='green')
-        plt.plot([vehicle_x, vehicle_predicted_x], [vehicle_y, vehicle_predicted_y], color='yellow')
-        plt.plot([vehicle_x, vehicle_steering_x], [vehicle_y, vehicle_steering_y], color='blue')
+        plt.plot([vehicle_x, vehicle_best_dir_x], [vehicle_y, vehicle_best_dir_y], color='white')
 
         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
         plt.scatter(target_x, target_y, color='red')          # target position
 
-# repartition
-# for i in range(len(coords)):
-#     if i % 100 == 0:
-#         coord = coords[i]
-#
-#         vehicle_x = coord['vehicle_x']
-#         vehicle_y = coord['vehicle_y']
-#
-#         plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
+average_speed /= len(coords)
+average_view_distance /= len(coords)
+average_target_distance /= len(coords)
 
+print('average_speed: ' + str(average_speed))
+print('average_view_distance: ' + str(average_view_distance))
+print('average_target_distance: ' + str(average_target_distance))
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
 
