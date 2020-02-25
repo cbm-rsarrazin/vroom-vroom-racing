@@ -8,8 +8,7 @@ def reward_function(params):
     prediction_weight = 0.7
     waypoint_view_min = 10
     waypoint_view_max = 30
-    speed_max = 2.7
-    steering_angle_max = 30
+    speed_max = 4
     score_max_direction = 5
     score_max_race_complete = 20
 
@@ -31,12 +30,10 @@ def reward_function(params):
     source_idx = closest_waypoints[0]
 
     speed_ratio = speed / speed_max
-    steering_angle_ratio = abs(steering_angle) / steering_angle_max
 
     # find target
     view_distance = compute_view_distance(x, y, source_idx, waypoints, waypoint_view_max, track_width)
-    view_distance_speed_factor = 1 - steering_angle_ratio
-    target_distance = max(waypoint_view_min, round(min(view_distance, waypoint_view_max) * view_distance_speed_factor))
+    target_distance = max(waypoint_view_min, round(min(view_distance, waypoint_view_max) * (1 - speed_ratio)))
     target_idx = source_idx + target_distance
 
     target = waypoints[target_idx % len(waypoints)]
