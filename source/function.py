@@ -6,7 +6,7 @@ def reward_function(params):
 
     # parameters
     prediction_weight = 0.7
-    waypoint_view_min = 10
+    waypoint_view_min = 15
     waypoint_view_max = 30
     speed_max = 4
     score_max_direction = 5
