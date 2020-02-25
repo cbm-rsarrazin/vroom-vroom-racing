@@ -310,6 +310,8 @@ for i in range(len(coords)):
     coord = coords[i]
 
     reward = coord['reward']
+    steps = coord['steps']
+    track_width = coord['trackwidth']
     vehicle_x = coord['vehicle_x']
     vehicle_y = coord['vehicle_y']
     target_x = coord['vehicle_target_x']
@@ -333,7 +335,9 @@ for i in range(len(coords)):
     print("- speed:" + str(vehicle_speed) +
           ", speed_ratio:" + str(vehicle_speed_ratio) +
           ", view_distance:" + str(vehicle_view_distance) +
-          ", target_distance:" + str(vehicle_target_distance))
+          ", target_distance:" + str(vehicle_target_distance) +
+          ", steps:" + str(steps) +
+          ", track_width:" + str(track_width))
 
     if i % 10000 == 0:
         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
