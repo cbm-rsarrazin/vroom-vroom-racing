@@ -327,12 +327,15 @@ for i in range(len(coords)):
 print('\n')
 
 rewards = []
-average_speed = 0
-average_view_distance = 0
+avg_steps = 0
+min_steps = 99999999
+max_steps = -1
+avg_speed = 0
+avg_view_distance = 0
 min_view_distance = 99999999
 max_view_distance = -1
-average_target_distance = 0
-average_track_width = 0
+avg_target_distance = 0
+avg_track_width = 0
 
 for i in range(len(coords)):
     coord = coords[i]
@@ -348,10 +351,13 @@ for i in range(len(coords)):
     if reward not in rewards:
         rewards.append(reward)
 
-    average_track_width += track_width
-    average_speed += vehicle_speed
-    average_view_distance += vehicle_view_distance
-    average_target_distance += vehicle_target_distance
+    avg_steps += steps
+    min_steps = min(min_steps, steps)
+    max_steps = max(max_steps, steps)
+    avg_track_width += track_width
+    avg_speed += vehicle_speed
+    avg_view_distance += vehicle_view_distance
+    avg_target_distance += vehicle_target_distance
     min_view_distance = min(min_view_distance, vehicle_view_distance)
     max_view_distance = max(max_view_distance, vehicle_view_distance)
 
@@ -359,20 +365,25 @@ for i in range(len(coords)):
           ", speed_ratio:" + str(vehicle_speed_ratio) +
           ", view_distance:" + str(vehicle_view_distance) +
           ", target_distance:" + str(vehicle_target_distance) +
-          ", steps:" + str(steps))
+          ", steps:" + str(steps) +
+          ", reward:" + str(reward))
 
-average_track_width /= len(coords)
-average_speed /= len(coords)
-average_view_distance /= len(coords)
-average_target_distance /= len(coords)
+avg_steps /= len(coords)
+avg_track_width /= len(coords)
+avg_speed /= len(coords)
+avg_view_distance /= len(coords)
+avg_target_distance /= len(coords)
 
 print('\n')
-print('average_track_width: ' + str(average_track_width))
-print('average_speed: ' + str(average_speed))
-print('average_view_distance: ' + str(average_view_distance))
+print('avg_step: ' + str(avg_steps))
+print('min_step: ' + str(min_steps))
+print('max_step: ' + str(max_steps))
+print('avg_track_width: ' + str(avg_track_width))
+print('avg_speed: ' + str(avg_speed))
+print('avg_target_distance: ' + str(avg_target_distance))
+print('avg_view_distance: ' + str(avg_view_distance))
 print('min_view_distance: ' + str(min_view_distance))
 print('max_view_distance: ' + str(max_view_distance))
-print('average_target_distance: ' + str(average_target_distance))
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
 

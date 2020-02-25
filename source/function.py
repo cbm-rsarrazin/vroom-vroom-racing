@@ -2,12 +2,11 @@ import math
 
 
 def reward_function(params):
-    import math
-
     # parameters
     speed_max = 4
-    score_max = 5
-    score_race_complete = 20
+    score_max_direction = 5
+    score_max_complete = 20
+    score_max_per_step = 0.02
     prediction_weight = 0.7
     waypoint_view_min = 15
 
@@ -49,12 +48,14 @@ def reward_function(params):
     direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
 
     # reward
-    reward = round(score_max * direction_diff_ratio, 1)
+    reward = round(score_max_direction * direction_diff_ratio, 1)
 
+    if progress == 100:
+        reward += score_max_complete
     if is_crashed or is_offtrack or is_reversed:
         reward = 0.0
-    if progress == 100:
-        reward += score_race_complete
+    else:
+        reward += score_max_per_step * steps
 
     log(waypoints,
         closest_waypoints,
@@ -146,7 +147,6 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
         vehicle_best_dir, vehicle_steering, vehicle_predicted, target_distance,
         view_distance, speed, speed_ratio):
 
-    import math
     coord0 = waypoints[closest_waypoints[0]]
     coord1 = waypoints[closest_waypoints[1]]
     myradians = math.atan2(coord1[1] - coord0[1], coord1[0] - coord0[0])
