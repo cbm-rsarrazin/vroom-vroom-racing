@@ -304,6 +304,8 @@ rewards = []
 # speed
 average_speed = 0
 average_view_distance = 0
+min_view_distance = 99999999
+max_view_distance = -1
 average_target_distance = 0
 
 for i in range(len(coords)):
@@ -331,6 +333,8 @@ for i in range(len(coords)):
     average_speed += vehicle_speed
     average_view_distance += vehicle_view_distance
     average_target_distance += vehicle_target_distance
+    min_view_distance = min(min_view_distance, vehicle_view_distance)
+    max_view_distance = max(max_view_distance, vehicle_view_distance)
 
     print("- speed:" + str(vehicle_speed) +
           ", speed_ratio:" + str(vehicle_speed_ratio) +
@@ -358,6 +362,8 @@ average_target_distance /= len(coords)
 
 print('average_speed: ' + str(average_speed))
 print('average_view_distance: ' + str(average_view_distance))
+print('min_view_distance: ' + str(min_view_distance))
+print('max_view_distance: ' + str(max_view_distance))
 print('average_target_distance: ' + str(average_target_distance))
 print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
