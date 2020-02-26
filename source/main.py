@@ -10,7 +10,7 @@ def main():
         'progress': 30.0,
         'track_width': 0.6,
         'heading': 0.0,
-        'closest_waypoints': [2, 3],
+        'closest_waypoints': [10, 11],
         'x': 4.0,
         'y': 0.68,
         'steering_angle': 0.0,

@@ -249,6 +249,15 @@ plt.ylabel('y axis')
 string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
 coords = list(string_path_data[3])
+uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
+
+
+# path
+for i in range(len(uniquewaypoints)):
+    x = uniquewaypoints[i]['x']
+    y = uniquewaypoints[i]['y']
+
+    plt.scatter(x, y, color='white')
 
 
 # repartition

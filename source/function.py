@@ -8,11 +8,14 @@ def reward_function(params):
     prediction_weight = 0.7
     waypoint_view_min = 10
     speed_max = 4
+    dist_waypoints_max = 0.05
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
     is_reversed = params['is_reversed']
 
+    x = params['x']
+    y = params['y']
     progress = params['progress']
     speed = params['speed']
     steering_angle = params['steering_angle']
@@ -20,20 +23,19 @@ def reward_function(params):
     track_width = params['track_width']
     heading = params['heading']
     waypoints = params['waypoints']
+    virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max)
     closest_waypoints = params['closest_waypoints']
 
-    x = params['x']
-    y = params['y']
-    source_idx = closest_waypoints[0]
+    source_idx = find_clothest(x, y, index_waypoints[closest_waypoints[0]], index_waypoints[closest_waypoints[1]], virtual_waypoints)
 
     speed_ratio = speed / speed_max
 
     # find target
-    target_distance_view, dist, nearest = compute_distance_view(x, y, source_idx, waypoints, track_width)
+    target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
     target_distance = max(waypoint_view_min, round(target_distance_view * (1 - speed_ratio)))
     target_idx = source_idx + target_distance
 
-    target = waypoints[target_idx % len(waypoints)]
+    target = virtual_waypoints[target_idx % len(virtual_waypoints)]
 
     # best dir
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
@@ -60,6 +62,7 @@ def reward_function(params):
         steering_angle,
         steps,
         reward,
+        source_idx,
         x,
         y,
         target[0],
@@ -76,6 +79,46 @@ def reward_function(params):
         speed_ratio)
 
     return reward
+
+
+def build_virtual_waypoints(waypoints, dist):
+    virtual_waypoints = []
+    index_waypoints = {}
+
+    for i in range(0, len(waypoints) - 1):
+        x1 = waypoints[i][0]
+        y1 = waypoints[i][1]
+        x2 = waypoints[i + 1][0]
+        y2 = waypoints[i + 1][1]
+
+        length = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+        nb_section = math.floor(length / dist) + 1
+
+        index_waypoints[i] = len(virtual_waypoints)
+
+        for j in range(0, nb_section):
+            x = x1 + (x2 - x1) * (1 / nb_section) * j
+            y = y1 + (y2 - y1) * (1 / nb_section) * j
+            virtual_waypoints.append([x, y])
+
+    virtual_waypoints.append(waypoints[len(waypoints) - 1])
+    index_waypoints[len(waypoints) - 1] = len(virtual_waypoints) - 1
+
+    return virtual_waypoints, index_waypoints
+
+
+def find_clothest(x, y, clothest_from, clothest_to, virtual_waypoints):
+    clothest = virtual_waypoints[clothest_from]
+    dist_min = math.sqrt(math.pow(clothest[0] - x, 2) + math.pow(clothest[1] - y, 2))
+
+    for i in range(clothest_from + 1, clothest_to):
+        waypoint = virtual_waypoints[i]
+
+        dist = math.sqrt(math.pow(waypoint[0] - x, 2) + math.pow(waypoint[1] - y, 2))
+        if dist_min > dist:
+            dist_min = dist
+        else:
+            return i - 1
 
 
 def compute_distance_view(x, y, source_idx, waypoints, track_width):
@@ -95,7 +138,7 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width):
         target_idx = source_idx + target_distance_view
 
 
-def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
+def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward, clothest_virtual_waypoints,
         vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_target_nearest_x,
         vehicle_target_nearest_y, vehicle_heading, vehicle_best_dir, vehicle_steering,
         vehicle_predicted, target_distance, target_distance_view, speed, speed_ratio):
@@ -113,6 +156,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "steering_angle:{},"
           "steps:{},"
           "reward:{},"
+          "clothest_virtual_waypoints:{},"
           "vehicle_x:{},"
           "vehicle_y:{},"
           "vehicle_target_x:{},"
@@ -135,6 +179,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
             steering_angle,
             steps,
             reward,
+            clothest_virtual_waypoints,
             vehicle_x,
             vehicle_y,
             vehicle_target_x,
