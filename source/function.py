@@ -7,6 +7,7 @@ def reward_function(params):
     score_max_complete = 20
     prediction_weight = 0.7
     waypoint_view_min = 10
+    waypoint_view_max = 30
     speed_max = 4
     dist_waypoints_max = 0.05
 
@@ -32,7 +33,7 @@ def reward_function(params):
 
     # find target
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_distance = max(waypoint_view_min, round(target_distance_view * (1 - speed_ratio)))
+    target_distance = max(waypoint_view_min, min(waypoint_view_max, round(target_distance_view * (1 - speed_ratio))))
     target_idx = source_idx + target_distance
 
     target = virtual_waypoints[target_idx % len(virtual_waypoints)]
