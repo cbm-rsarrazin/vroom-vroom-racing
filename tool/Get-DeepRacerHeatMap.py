@@ -136,14 +136,16 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         vehicle_y = float(commasplit[9].split(':')[1].strip())
         vehicle_target_x = float(commasplit[10].split(':')[1].strip())
         vehicle_target_y = float(commasplit[11].split(':')[1].strip())
-        vehicle_heading = float(commasplit[12].split(':')[1].strip())
-        vehicle_best_dir = float(commasplit[13].split(':')[1].strip())
-        vehicle_steering = float(commasplit[14].split(':')[1].strip())
-        vehicle_predicted = float(commasplit[15].split(':')[1].strip())
-        vehicle_target_distance = float(commasplit[16].split(':')[1].strip())
-        vehicle_view_distance = float(commasplit[17].split(':')[1].strip())
-        vehicle_speed = float(commasplit[18].split(':')[1].strip())
-        vehicle_speed_ratio = float(commasplit[19].split(':')[1].strip())
+        vehicle_target_nearest_x = float(commasplit[12].split(':')[1].strip())
+        vehicle_target_nearest_y = float(commasplit[13].split(':')[1].strip())
+        vehicle_heading = float(commasplit[14].split(':')[1].strip())
+        vehicle_best_dir = float(commasplit[15].split(':')[1].strip())
+        vehicle_steering = float(commasplit[16].split(':')[1].strip())
+        vehicle_predicted = float(commasplit[17].split(':')[1].strip())
+        vehicle_target_distance_view = float(commasplit[18].split(':')[1].strip())
+        vehicle_target_distance = float(commasplit[19].split(':')[1].strip())
+        vehicle_speed = float(commasplit[20].split(':')[1].strip())
+        vehicle_speed_ratio = float(commasplit[21].split(':')[1].strip())
 
         coords.append({'waypoint': waypoint,
                        'x': x,
@@ -157,12 +159,14 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
                        'vehicle_y': vehicle_y,
                        'vehicle_target_x': vehicle_target_x,
                        'vehicle_target_y': vehicle_target_y,
+                       'vehicle_target_nearest_x': vehicle_target_nearest_x,
+                       'vehicle_target_nearest_y': vehicle_target_nearest_y,
                        'vehicle_heading': vehicle_heading,
                        'vehicle_best_dir': vehicle_best_dir,
                        'vehicle_steering': vehicle_steering,
                        'vehicle_predicted': vehicle_predicted,
+                       'vehicle_target_distance_view': vehicle_target_distance_view,
                        'vehicle_target_distance': vehicle_target_distance,
-                       'vehicle_view_distance': vehicle_view_distance,
                        'vehicle_speed': vehicle_speed,
                        'vehicle_speed_ratio': vehicle_speed_ratio})
         # print("X: {}, Y: {}".format(x,y))
@@ -244,14 +248,14 @@ coords = list(string_path_data[3])
 
 
 # repartition
-for i in range(len(coords)):
-    if i % 1000 == 0:
-        coord = coords[i]
-
-        vehicle_x = coord['vehicle_x']
-        vehicle_y = coord['vehicle_y']
-
-        plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
+# for i in range(len(coords)):
+#     if i % 1000 == 0:
+#         coord = coords[i]
+#
+#         vehicle_x = coord['vehicle_x']
+#         vehicle_y = coord['vehicle_y']
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue', alpha=0.01)
 
 
 # direction
@@ -306,10 +310,12 @@ for i in range(len(coords)):
     vehicle_y = coord['vehicle_y']
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
+    nearest_x = coord['vehicle_target_nearest_x']
+    nearest_y = coord['vehicle_target_nearest_y']
     vehicle_speed_ratio = coord['vehicle_speed_ratio']
     vehicle_best_dir = coord['vehicle_best_dir']
 
-    if i % 5000 == 0:
+    if i % 100 == 0:
         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
 
         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
@@ -321,6 +327,7 @@ for i in range(len(coords)):
 
         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
         plt.scatter(target_x, target_y, color='red')          # target position
+        plt.scatter(nearest_x, nearest_y, color='green')          # target position
 
 
 # print
