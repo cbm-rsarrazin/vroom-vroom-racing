@@ -222,6 +222,10 @@ def get_point_from_angle(x, y, angle_deg, dist):
     angle_rad = math.radians(angle_deg)
     return x + (dist * math.cos(angle_rad)), y + (dist * math.sin(angle_rad))
 
+
+def round_2(val):
+    return round(val * 100) / 100
+
 # MAIN
 
 
@@ -315,7 +319,7 @@ for i in range(len(coords)):
     vehicle_speed_ratio = coord['vehicle_speed_ratio']
     vehicle_best_dir = coord['vehicle_best_dir']
 
-    if i % 100 == 0:
+    if i % 5000 == 0:
         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
 
         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
@@ -354,6 +358,12 @@ for i in range(len(coords)):
     vehicle_target_distance = coord['vehicle_target_distance']
     vehicle_speed = coord['vehicle_speed']
     vehicle_speed_ratio = coord['vehicle_speed_ratio']
+    vehicle_x = round_2(coord['vehicle_x'])
+    vehicle_y = round_2(coord['vehicle_y'])
+    target_x = round_2(coord['vehicle_target_x'])
+    target_y = round_2(coord['vehicle_target_y'])
+    nearest_x = round_2(coord['vehicle_target_nearest_x'])
+    nearest_y = round_2(coord['vehicle_target_nearest_y'])
 
     if reward not in rewards:
         rewards.append(reward)
@@ -368,7 +378,9 @@ for i in range(len(coords)):
     min_distance_view = min(min_distance_view, vehicle_target_distance_view)
     max_distance_view = max(min_distance_view, vehicle_target_distance_view)
 
-    print("- speed:" + str(vehicle_speed) +
+    print("- vehicle:" + str((vehicle_x, vehicle_y)) +
+          ", target:" + str((target_x, target_y)) +
+          ", nearest:" + str((nearest_x, nearest_y)) +
           ", speed_ratio:" + str(vehicle_speed_ratio) +
           ", view_distance:" + str(vehicle_target_distance_view) +
           ", target_distance:" + str(vehicle_target_distance) +
