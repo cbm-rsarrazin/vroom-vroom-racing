@@ -85,7 +85,8 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width, min_distance
 
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
-            if distance_point_to_line(current[0], current[1], x, y, target[0], target[1]) > track_width / 2:
+            dist, nearest = distance_point_to_line(current[0], current[1], x, y, target[0], target[1])
+            if dist > track_width / 2:
                 return view_distance - 1
 
         view_distance = view_distance + 1
