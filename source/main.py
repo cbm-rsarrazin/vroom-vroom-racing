@@ -3,9 +3,18 @@ from source.function import reward_function
 
 def main():
     params = {
-        'progress': 30,
-        'track_width': 1.5,
+        'is_crashed': False,
+        'is_offtrack': False,
+        'is_reversed': False,
+        'speed': 4.0,
+        'progress': 30.0,
+        'track_width': 0.6,
         'heading': 0.0,
+        'closest_waypoints': [2, 3],
+        'x': 4.0,
+        'y': 0.68,
+        'steering_angle': 0.0,
+        'steps': 0.0,
         'waypoints': [[2.9685466767304676, 0.3736381785611765],
                       [3.376694115196499, 0.6891184741673322],
                       [3.5728138542999743, 0.6950269601678832],
@@ -75,12 +84,7 @@ def main():
                       [1.464473454255551, 0.785135238003985],
                       [1.9009937145581672, 0.6109098568442695],
                       [2.707405186662496, 0.3932314638314363],
-                      [2.8389740478559014, 0.38388247153447946]],
-        'closest_waypoints': [2, 3],
-        'x': 3.5,
-        'y': 1,
-        'steering_angle': 20,
-        'steps': []
+                      [2.8389740478559014, 0.38388247153447946]]
     }
     score = reward_function(params)
     print("score: " + str(score))

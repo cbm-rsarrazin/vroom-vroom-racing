@@ -3,12 +3,11 @@ import math
 
 def reward_function(params):
     # parameters
-    speed_max = 4
     score_max_direction = 5
     score_max_complete = 20
-    score_max_per_step = 0.02
     prediction_weight = 0.7
-    waypoint_view_min = 15
+    waypoint_view_min = 10
+    speed_max = 4
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
@@ -30,8 +29,8 @@ def reward_function(params):
     speed_ratio = speed / speed_max
 
     # find target
-    view_distance = compute_view_distance(x, y, source_idx, waypoints, track_width)
-    target_distance = max(waypoint_view_min, round(view_distance * (1 - speed_ratio)))
+    target_distance_view = compute_distance_view(x, y, source_idx, waypoints, track_width, waypoint_view_min)
+    target_distance = max(waypoint_view_min, round(target_distance_view * (1 - speed_ratio)))
     target_idx = source_idx + target_distance
 
     target = waypoints[target_idx % len(waypoints)]
@@ -50,12 +49,10 @@ def reward_function(params):
     # reward
     reward = round(score_max_direction * direction_diff_ratio, 1)
 
-    if progress == 100:
-        reward += score_max_complete
     if is_crashed or is_offtrack or is_reversed:
         reward = 0.0
-    else:
-        reward += score_max_per_step * steps
+    if progress == 100:
+        reward += score_max_complete
 
     log(waypoints,
         closest_waypoints,
@@ -72,74 +69,29 @@ def reward_function(params):
         steering,
         predicted,
         target_distance,
-        view_distance,
+        target_distance_view,
         speed,
         speed_ratio)
 
     return reward
 
 
-def compute_view_distance(x, y, source_idx, waypoints, track_width):
+def compute_distance_view(x, y, source_idx, waypoints, track_width, min_distance):
     view_distance = 2
     target_idx = source_idx + view_distance
 
-    while True:
+    while target_idx % len(waypoints) != source_idx:
         target = waypoints[target_idx % len(waypoints)]
 
         for i in range(source_idx + 1, target_idx):
             current = waypoints[i % len(waypoints)]
-            if dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2, track_width / 2):
-                return view_distance
+            if distance_point_to_line(current[0], current[1], x, y, target[0], target[1]) > track_width / 2:
+                return view_distance - 1
 
         view_distance = view_distance + 1
         target_idx = source_idx + view_distance
 
-
-def dps(px, py, x1, y1, x2, y2):
-    mag = math.hypot(x2 - x1, y2 - y1)
-
-    if mag < 0.00000001:
-        dst = 9999
-        return dst
-
-    u1 = (((px - x1) * (x2 - x1)) + ((py - y1) * (y2 - y1)))
-    u = u1 / (mag * mag)
-
-    if (u < 0.00001) or (u > 1):
-        ix = math.hypot(x1 - px, y1 - py)
-        iy = math.hypot(x2 - px, y2 - py)
-        if ix > iy:
-            dst = iy
-        else:
-            dst = ix
-    else:
-        ix = x1 + u * (x2 - x1)
-        iy = y1 + u * (y2 - y1)
-        dst = math.hypot(ix - px, iy - py)
-
-    return dst
-
-
-def angle_min_diff(x, y):
-    arg = (y - x) % 360
-    if arg < 0:
-        arg = arg + 360
-    if arg > 180:
-        arg = arg - 360
-    return -arg
-
-
-def atan2_deg(x1, y1, x2, y2):
-    rad = math.atan2(y2 - y1, x2 - x1)
-    deg = math.degrees(rad)
-    return nor(deg)
-
-
-def nor(angle):
-    angle = angle % 360
-    if angle < 0:
-        angle = angle + 360
-    return angle
+    return min_distance
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
@@ -192,3 +144,86 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
             view_distance,
             speed,
             speed_ratio))
+
+
+# HELPER
+
+def angle_min_diff(x, y):
+    arg = (y - x) % 360
+    if arg < 0:
+        arg = arg + 360
+    if arg > 180:
+        arg = arg - 360
+    return -arg
+
+
+def atan2_deg(x1, y1, x2, y2):
+    rad = math.atan2(y2 - y1, x2 - x1)
+    deg = math.degrees(rad)
+    return nor(deg)
+
+
+def nor(angle):
+    angle = angle % 360
+    if angle < 0:
+        angle = angle + 360
+    return angle
+
+
+def vector_dot(v, w):
+    x, y, z = v
+    xx, yy, zz = w
+    return x * xx + y * yy + z * zz
+
+
+def vector_length(v):
+    x, y, z = v
+    return math.sqrt(x * x + y * y + z * z)
+
+
+def vector(b, e):
+    x, y, z = b
+    xx, yy, zz = e
+    return xx - x, yy - y, zz - z
+
+
+def vector_unit(v):
+    x, y, z = v
+    mag = vector_length(v)
+    return x / mag, y / mag, z / mag
+
+
+def vector_distance(p0, p1):
+    return vector_length(vector(p0, p1))
+
+
+def vector_scale(v, sc):
+    x, y, z = v
+    return x * sc, y * sc, z * sc
+
+
+def vector_add(v, w):
+    x, y, z = v
+    xx, yy, zz = w
+    return x + xx, y + yy, z + zz
+
+
+def distance_point_to_line(x, y, x1, y1, x2, y2):
+    pnt = (x, y, 0)
+    start = (x1, y1, 0)
+    end = (x2, y2, 0)
+
+    line_vec = vector(start, end)
+    pnt_vec = vector(start, pnt)
+    line_len = vector_length(line_vec)
+    line_unit_vec = vector_unit(line_vec)
+    pnt_vec_scaled = vector_scale(pnt_vec, 1.0 / line_len)
+    t = vector_dot(line_unit_vec, pnt_vec_scaled)
+    if t < 0.0:
+        t = 0.0
+    elif t > 1.0:
+        t = 1.0
+    nearest = vector_scale(line_vec, t)
+    dist = vector_distance(nearest, pnt_vec)
+    nearest = vector_add(nearest, start)
+    return dist, nearest
