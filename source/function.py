@@ -7,8 +7,8 @@ def reward_function(params):
     score_max_complete = 20
     prediction_weight = 0.7
     speed_max = 4
-    dist_virtual_waypoints_ratio = 1/3
-    waypoint_view_min = 5
+    dist_virtual_waypoints_ratio = 1/2
+    waypoint_view_min = 3
     waypoint_view_max = 15
 
     x = params['x']
