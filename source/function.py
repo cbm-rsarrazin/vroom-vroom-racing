@@ -8,7 +8,7 @@ def reward_function(params):
     prediction_weight = 0.7
     speed_max = 4
     dist_virtual_waypoints_ratio = 1/2
-    dist_target_max = 5
+    dist_target_max = 8
 
     x = params['x']
     y = params['y']
