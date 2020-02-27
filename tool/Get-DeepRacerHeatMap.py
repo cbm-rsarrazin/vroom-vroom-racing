@@ -367,20 +367,20 @@ uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
 
 
 # target
-for i in range(len(coords)):
-    coord = coords[i]
-
-    reward = coord['reward']
-    vehicle_x = coord['vehicle_x']
-    vehicle_y = coord['vehicle_y']
-    target_x = coord['vehicle_target_x']
-    target_y = coord['vehicle_target_y']
-
-    if reward == 0 and i % 1 == 0:
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
-
-        plt.scatter(vehicle_x, vehicle_y, color='blue')
-        plt.scatter(target_x, target_y, color='red')
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     reward = coord['reward']
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     target_x = coord['vehicle_target_x']
+#     target_y = coord['vehicle_target_y']
+#
+#     if reward > 0 and i % 1 == 0:
+#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red', alpha=0.01)
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')
+#         plt.scatter(target_x, target_y, color='red')
 
 
 # print

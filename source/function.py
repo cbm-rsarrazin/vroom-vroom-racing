@@ -8,6 +8,7 @@ def reward_function(params):
     prediction_weight = 0.7
     speed_max = 4
     dist_virtual_waypoints_ratio = 1/2
+    dist_target_max = 5
 
     x = params['x']
     y = params['y']
@@ -29,7 +30,8 @@ def reward_function(params):
 
     # find target
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_idx = source_idx + target_distance_view
+    target_distance = min(target_distance_view, dist_target_max)
+    target_idx = source_idx + target_distance
 
     source = virtual_waypoints[source_idx % len(virtual_waypoints)]
     target = virtual_waypoints[target_idx % len(virtual_waypoints)]
@@ -77,7 +79,7 @@ def reward_function(params):
         steering,
         predicted,
         target_distance_view,
-        target_distance_view,
+        target_distance,
         speed,
         speed_ratio)
 
