@@ -134,18 +134,20 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
         reward = float(commasplit[7].split(':')[1].strip())
         vehicle_x = float(commasplit[8].split(':')[1].strip())
         vehicle_y = float(commasplit[9].split(':')[1].strip())
-        vehicle_target_x = float(commasplit[10].split(':')[1].strip())
-        vehicle_target_y = float(commasplit[11].split(':')[1].strip())
-        vehicle_target_nearest_x = float(commasplit[12].split(':')[1].strip())
-        vehicle_target_nearest_y = float(commasplit[13].split(':')[1].strip())
-        vehicle_heading = float(commasplit[14].split(':')[1].strip())
-        vehicle_best_dir = float(commasplit[15].split(':')[1].strip())
-        vehicle_steering = float(commasplit[16].split(':')[1].strip())
-        vehicle_predicted = float(commasplit[17].split(':')[1].strip())
-        vehicle_target_distance_view = float(commasplit[18].split(':')[1].strip())
-        vehicle_target_distance = float(commasplit[19].split(':')[1].strip())
-        vehicle_speed = float(commasplit[20].split(':')[1].strip())
-        vehicle_speed_ratio = float(commasplit[21].split(':')[1].strip())
+        vehicle_source_x = float(commasplit[10].split(':')[1].strip())
+        vehicle_source_y = float(commasplit[11].split(':')[1].strip())
+        vehicle_target_x = float(commasplit[12].split(':')[1].strip())
+        vehicle_target_y = float(commasplit[13].split(':')[1].strip())
+        vehicle_target_nearest_x = float(commasplit[14].split(':')[1].strip())
+        vehicle_target_nearest_y = float(commasplit[15].split(':')[1].strip())
+        vehicle_heading = float(commasplit[16].split(':')[1].strip())
+        vehicle_best_dir = float(commasplit[17].split(':')[1].strip())
+        vehicle_steering = float(commasplit[18].split(':')[1].strip())
+        vehicle_predicted = float(commasplit[19].split(':')[1].strip())
+        vehicle_target_distance_view = float(commasplit[20].split(':')[1].strip())
+        vehicle_target_distance = float(commasplit[21].split(':')[1].strip())
+        vehicle_speed = float(commasplit[22].split(':')[1].strip())
+        vehicle_speed_ratio = float(commasplit[23].split(':')[1].strip())
 
         coords.append({'waypoint': waypoint,
                        'x': x,
@@ -157,6 +159,8 @@ def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepo
                        'reward': reward,
                        'vehicle_x': vehicle_x,
                        'vehicle_y': vehicle_y,
+                       'vehicle_source_x': vehicle_source_x,
+                       'vehicle_source_y': vehicle_source_y,
                        'vehicle_target_x': vehicle_target_x,
                        'vehicle_target_y': vehicle_target_y,
                        'vehicle_target_nearest_x': vehicle_target_nearest_x,
@@ -252,16 +256,6 @@ coords = list(string_path_data[3])
 uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
 
 
-# path
-for i in range(len(coords)):
-    coord = coords[i]
-
-    target_x = coord['vehicle_target_x']
-    target_y = coord['vehicle_target_y']
-
-    plt.scatter(target_x, target_y, color='white')
-
-
 # repartition
 # for i in range(len(coords)):
 #     if i % 1000 == 0:
@@ -318,31 +312,32 @@ for i in range(len(coords)):
 
 
 # speed to target
-# for i in range(len(coords)):
-#     coord = coords[i]
-#
-#     vehicle_x = coord['vehicle_x']
-#     vehicle_y = coord['vehicle_y']
-#     target_x = coord['vehicle_target_x']
-#     target_y = coord['vehicle_target_y']
-#     nearest_x = coord['vehicle_target_nearest_x']
-#     nearest_y = coord['vehicle_target_nearest_y']
-#     vehicle_speed_ratio = coord['vehicle_speed_ratio']
-#     vehicle_best_dir = coord['vehicle_best_dir']
-#
-#     if i % 1 == 0:
-#         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
-#
-#         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
-#         vehicle_best_dir_x = vehicle_best_dir_point[0]
-#         vehicle_best_dir_y = vehicle_best_dir_point[1]
-#
-#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
-#         plt.plot([vehicle_x, vehicle_best_dir_x], [vehicle_y, vehicle_best_dir_y], color='white')
-#
-#         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
-#         plt.scatter(target_x, target_y, color='red')          # target position
-#         plt.scatter(nearest_x, nearest_y, color='green')          # target position
+for i in range(len(coords)):
+    coord = coords[i]
+
+    reward = coord['reward']
+    vehicle_x = coord['vehicle_x']
+    vehicle_y = coord['vehicle_y']
+    target_x = coord['vehicle_target_x']
+    target_y = coord['vehicle_target_y']
+    nearest_x = coord['vehicle_target_nearest_x']
+    nearest_y = coord['vehicle_target_nearest_y']
+    vehicle_speed_ratio = coord['vehicle_speed_ratio']
+    vehicle_best_dir = coord['vehicle_best_dir']
+
+    if reward > 0 and i % 30 == 0:
+        dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
+
+        vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
+        vehicle_best_dir_x = vehicle_best_dir_point[0]
+        vehicle_best_dir_y = vehicle_best_dir_point[1]
+
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
+        plt.plot([vehicle_x, vehicle_best_dir_x], [vehicle_y, vehicle_best_dir_y], color='white')
+
+        plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
+        plt.scatter(target_x, target_y, color='red')          # target position
+        plt.scatter(nearest_x, nearest_y, color='green')      # nearest position
 
 
 # print
@@ -387,7 +382,7 @@ for i in range(len(coords)):
     avg_target_distance += vehicle_target_distance
     avg_distance_view += vehicle_target_distance_view
     min_distance_view = min(min_distance_view, vehicle_target_distance_view)
-    max_distance_view = max(min_distance_view, vehicle_target_distance_view)
+    max_distance_view = max(max_distance_view, vehicle_target_distance_view)
 
     print("- vehicle:" + str((vehicle_x, vehicle_y)) +
           ", target:" + str((target_x, target_y)) +

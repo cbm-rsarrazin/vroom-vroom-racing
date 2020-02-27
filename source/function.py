@@ -7,7 +7,6 @@ def reward_function(params):
     score_max_complete = 20
     prediction_weight = 0.7
     waypoint_view_min = 20
-    waypoint_view_max = 60
     speed_max = 4
     dist_virtual_waypoints_ratio = 0.2
 
@@ -34,9 +33,10 @@ def reward_function(params):
 
     # find target
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_distance = max(waypoint_view_min, min(waypoint_view_max, round(target_distance_view * (1 - speed_ratio))))
+    target_distance = max(waypoint_view_min, round(target_distance_view * (1 - speed_ratio)))
     target_idx = source_idx + target_distance
 
+    source = virtual_waypoints[source_idx % len(virtual_waypoints)]
     target = virtual_waypoints[target_idx % len(virtual_waypoints)]
 
     # best dir
@@ -53,7 +53,7 @@ def reward_function(params):
     # reward
     reward = round(score_max_direction * direction_diff_ratio, 1)
 
-    if is_crashed or is_offtrack or is_reversed:
+    if dist_to(x, y, source[0], source[1]) > dist_waypoints_max + track_width / 2 or is_crashed or is_offtrack or is_reversed:
         reward = 0.0
     if progress == 100:
         reward += score_max_complete
@@ -66,6 +66,8 @@ def reward_function(params):
         reward,
         x,
         y,
+        source[0],
+        source[1],
         target[0],
         target[1],
         nearest[0],
@@ -141,9 +143,10 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width):
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
-        vehicle_x, vehicle_y, vehicle_target_x, vehicle_target_y, vehicle_target_nearest_x,
-        vehicle_target_nearest_y, vehicle_heading, vehicle_best_dir, vehicle_steering,
-        vehicle_predicted, target_distance, target_distance_view, speed, speed_ratio):
+        vehicle_x, vehicle_y, vehicle_source_x, vehicle_source_y, vehicle_target_x,
+        vehicle_target_y, vehicle_target_nearest_x, vehicle_target_nearest_y,
+        vehicle_heading, vehicle_best_dir, vehicle_steering, vehicle_predicted,
+        target_distance, target_distance_view, speed, speed_ratio):
 
     coord0 = waypoints[closest_waypoints[0]]
     coord1 = waypoints[closest_waypoints[1]]
@@ -160,6 +163,8 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "reward:{},"
           "vehicle_x:{},"
           "vehicle_y:{},"
+          "vehicle_source_x:{},"
+          "vehicle_source_y:{},"
           "vehicle_target_x:{},"
           "vehicle_target_y:{},"
           "vehicle_target_nearest_x:{},"
@@ -182,6 +187,8 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
             reward,
             vehicle_x,
             vehicle_y,
+            vehicle_source_x,
+            vehicle_source_y,
             vehicle_target_x,
             vehicle_target_y,
             vehicle_target_nearest_x,
@@ -197,6 +204,10 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
 
 
 # HELPER
+
+def dist_to(x1, y1, x2, y2):
+    return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+
 
 def angle_min_diff(x, y):
     arg = (y - x) % 360
