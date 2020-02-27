@@ -27,8 +27,6 @@ def reward_function(params):
     clothest_1 = virtual_waypoints[index_waypoints[closest_waypoints[1]]]
     source_idx = find_clothest(x, y, index_waypoints[closest_waypoints[0]], index_waypoints[closest_waypoints[1]], virtual_waypoints)
 
-    speed_ratio = speed / speed_max
-
     # find target
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
     target_idx = source_idx + target_distance_view
@@ -41,6 +39,7 @@ def reward_function(params):
     heading = nor(heading)
     steering = nor(heading + steering_angle)
 
+    speed_ratio = speed / speed_max
     prediction_ratio = (1 - prediction_weight) + speed_ratio * prediction_weight
     predicted = nor(heading + prediction_ratio * steering_angle)
 
@@ -69,6 +68,10 @@ def reward_function(params):
         target[1],
         nearest[0],
         nearest[1],
+        clothest_0[0],
+        clothest_0[1],
+        clothest_1[0],
+        clothest_1[1],
         heading,
         best_dir,
         steering,
@@ -140,18 +143,14 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width):
 
 
 def outside_track(x, y, clothest_0, clothest_1, track_width):
-    a = dist_to(x, y, clothest_0[0], clothest_0[1])
-    b = dist_to(x, y, clothest_1[0], clothest_1[1])
-    c = dist_to(clothest_0[0], clothest_0[1], clothest_1[0], clothest_1[1])
-    s = (a + b + c) / 2
-    area = (s * (s - a) * (s - b) * (s - c)) ** 0.5
-    height = area / (0.5 * c)
-    return height > track_width / 2
+    dist, nearest = distance_point_to_line(x, y, clothest_0[0], clothest_0[1], clothest_1[0], clothest_1[1])
+    return dist > track_width / 2
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
         vehicle_x, vehicle_y, vehicle_source_x, vehicle_source_y, vehicle_target_x,
         vehicle_target_y, vehicle_target_nearest_x, vehicle_target_nearest_y,
+        vehicle_clothest_0_x, vehicle_clothest_0_y, vehicle_clothest_1_x, vehicle_clothest_1_y,
         vehicle_heading, vehicle_best_dir, vehicle_steering, vehicle_predicted,
         target_distance, target_distance_view, speed, speed_ratio):
 
@@ -176,6 +175,10 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "vehicle_target_y:{},"
           "vehicle_target_nearest_x:{},"
           "vehicle_target_nearest_y:{},"
+          "vehicle_closest_0_x:{},"
+          "vehicle_closest_0_y:{},"
+          "vehicle_closest_1_x:{},"
+          "vehicle_closest_1_y:{},"
           "vehicle_heading:{},"
           "vehicle_best_dir:{},"
           "vehicle_steering:{},"
@@ -200,6 +203,10 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
             vehicle_target_y,
             vehicle_target_nearest_x,
             vehicle_target_nearest_y,
+            vehicle_clothest_0_x,
+            vehicle_clothest_0_y,
+            vehicle_clothest_1_x,
+            vehicle_clothest_1_y,
             vehicle_heading,
             vehicle_best_dir,
             vehicle_steering,
