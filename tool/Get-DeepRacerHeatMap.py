@@ -253,11 +253,13 @@ uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
 
 
 # path
-for i in range(len(uniquewaypoints)):
-    x = uniquewaypoints[i]['x']
-    y = uniquewaypoints[i]['y']
+for i in range(len(coords)):
+    coord = coords[i]
 
-    plt.scatter(x, y, color='white')
+    target_x = coord['vehicle_target_x']
+    target_y = coord['vehicle_target_y']
+
+    plt.scatter(target_x, target_y, color='white')
 
 
 # repartition
@@ -316,31 +318,31 @@ for i in range(len(uniquewaypoints)):
 
 
 # speed to target
-for i in range(len(coords)):
-    coord = coords[i]
-
-    vehicle_x = coord['vehicle_x']
-    vehicle_y = coord['vehicle_y']
-    target_x = coord['vehicle_target_x']
-    target_y = coord['vehicle_target_y']
-    nearest_x = coord['vehicle_target_nearest_x']
-    nearest_y = coord['vehicle_target_nearest_y']
-    vehicle_speed_ratio = coord['vehicle_speed_ratio']
-    vehicle_best_dir = coord['vehicle_best_dir']
-
-    if i % 5000 == 0:
-        dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
-
-        vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
-        vehicle_best_dir_x = vehicle_best_dir_point[0]
-        vehicle_best_dir_y = vehicle_best_dir_point[1]
-
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
-        plt.plot([vehicle_x, vehicle_best_dir_x], [vehicle_y, vehicle_best_dir_y], color='white')
-
-        plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
-        plt.scatter(target_x, target_y, color='red')          # target position
-        plt.scatter(nearest_x, nearest_y, color='green')          # target position
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     target_x = coord['vehicle_target_x']
+#     target_y = coord['vehicle_target_y']
+#     nearest_x = coord['vehicle_target_nearest_x']
+#     nearest_y = coord['vehicle_target_nearest_y']
+#     vehicle_speed_ratio = coord['vehicle_speed_ratio']
+#     vehicle_best_dir = coord['vehicle_best_dir']
+#
+#     if i % 1 == 0:
+#         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
+#
+#         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
+#         vehicle_best_dir_x = vehicle_best_dir_point[0]
+#         vehicle_best_dir_y = vehicle_best_dir_point[1]
+#
+#         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
+#         plt.plot([vehicle_x, vehicle_best_dir_x], [vehicle_y, vehicle_best_dir_y], color='white')
+#
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')       # vehicle position
+#         plt.scatter(target_x, target_y, color='red')          # target position
+#         plt.scatter(nearest_x, nearest_y, color='green')          # target position
 
 
 # print
