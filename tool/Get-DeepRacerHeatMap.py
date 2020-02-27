@@ -348,6 +348,24 @@ uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
 #         plt.scatter(nearest_x, nearest_y, color='green')      # nearest position
 
 
+# closest
+# for i in range(len(coords)):
+#     coord = coords[i]
+#
+#     reward = coord['reward']
+#     vehicle_x = coord['vehicle_x']
+#     vehicle_y = coord['vehicle_y']
+#     vehicle_clothest_0_x = coord['vehicle_clothest_0_x']
+#     vehicle_clothest_0_y = coord['vehicle_clothest_0_y']
+#     vehicle_clothest_1_x = coord['vehicle_clothest_1_x']
+#     vehicle_clothest_1_y = coord['vehicle_clothest_1_y']
+#
+#     if reward > 0 and i % 1000 == 0:
+#         plt.scatter(vehicle_x, vehicle_y, color='blue')
+#         plt.scatter(vehicle_clothest_0_x, vehicle_clothest_0_y, color='green')
+#         plt.scatter(vehicle_clothest_1_x, vehicle_clothest_1_y, color='yellow')
+
+
 # target
 for i in range(len(coords)):
     coord = coords[i]
@@ -358,7 +376,7 @@ for i in range(len(coords)):
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
 
-    if reward > 0 and i % 10 == 0:
+    if reward == 0 and i % 1 == 0:
         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red')
 
         plt.scatter(vehicle_x, vehicle_y, color='blue')
