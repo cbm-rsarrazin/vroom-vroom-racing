@@ -33,7 +33,7 @@ def reward_function(params):
 
     # find target
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_distance = max(waypoint_view_min, round(target_distance_view * (1 - speed_ratio)))
+    target_distance = waypoint_view_min + max(0, round((target_distance_view - waypoint_view_min) * (1 - speed_ratio)))
     target_idx = source_idx + target_distance
 
     source = virtual_waypoints[source_idx % len(virtual_waypoints)]
