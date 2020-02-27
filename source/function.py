@@ -22,6 +22,9 @@ def reward_function(params):
 
     dist_waypoints_max = track_width * dist_virtual_waypoints_ratio
     virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max)
+
+    clothest_0 = virtual_waypoints[index_waypoints[closest_waypoints[0]]]
+    clothest_1 = virtual_waypoints[index_waypoints[closest_waypoints[1]]]
     source_idx = find_clothest(x, y, index_waypoints[closest_waypoints[0]], index_waypoints[closest_waypoints[1]], virtual_waypoints)
 
     speed_ratio = speed / speed_max
@@ -47,7 +50,7 @@ def reward_function(params):
     # reward
     reward = round(score_max_direction * direction_diff_ratio, 1)
 
-    if dist_to(x, y, source[0], source[1]) > (track_width + dist_waypoints_max) / 2:
+    if outside_track(x, y, clothest_0, clothest_1, track_width):
         reward = 0.0
     if progress == 100:
         reward += score_max_complete
@@ -134,6 +137,16 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width):
 
         target_distance_view = target_distance_view + 1
         target_idx = source_idx + target_distance_view
+
+
+def outside_track(x, y, clothest_0, clothest_1, track_width):
+    a = dist_to(x, y, clothest_0[0], clothest_0[1])
+    b = dist_to(x, y, clothest_1[0], clothest_1[1])
+    c = dist_to(clothest_0[0], clothest_0[1], clothest_1[0], clothest_1[1])
+    s = (a + b + c) / 2
+    area = (s * (s - a) * (s - b) * (s - c)) ** 0.5
+    height = area / (0.5 * c)
+    return height > track_width / 2
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,

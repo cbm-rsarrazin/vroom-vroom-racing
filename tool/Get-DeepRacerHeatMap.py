@@ -325,7 +325,7 @@ for i in range(len(coords)):
     vehicle_speed_ratio = coord['vehicle_speed_ratio']
     vehicle_best_dir = coord['vehicle_best_dir']
 
-    if reward > 0 and i % 2000 == 0:
+    if reward > 0 and i % 50 == 0:
         dst = vehicle_speed_ratio * math.sqrt(math.pow(target_x - vehicle_x, 2) + math.pow(target_y - vehicle_y, 2))
 
         vehicle_best_dir_point = get_point_from_angle(vehicle_x, vehicle_y, vehicle_best_dir, dst)
