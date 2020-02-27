@@ -6,13 +6,8 @@ def reward_function(params):
     score_max_direction = 5
     score_max_complete = 20
     prediction_weight = 0.7
-    waypoint_view_min = 20
     speed_max = 4
-    dist_virtual_waypoints_ratio = 0.15
-
-    is_crashed = params['is_crashed']
-    is_offtrack = params['is_offtrack']
-    is_reversed = params['is_reversed']
+    dist_virtual_waypoints_ratio = 1/3
 
     x = params['x']
     y = params['y']
@@ -32,8 +27,10 @@ def reward_function(params):
     speed_ratio = speed / speed_max
 
     # find target
+    waypoint_view_min = math.floor(2 * track_width / dist_waypoints_max)
+
     target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_distance = waypoint_view_min + max(0, round((target_distance_view - waypoint_view_min) * (1 - speed_ratio)))
+    target_distance = waypoint_view_min + round(max(0, target_distance_view - waypoint_view_min) * (1 - speed_ratio))
     target_idx = source_idx + target_distance
 
     source = virtual_waypoints[source_idx % len(virtual_waypoints)]
@@ -53,7 +50,7 @@ def reward_function(params):
     # reward
     reward = round(score_max_direction * direction_diff_ratio, 1)
 
-    if dist_to(x, y, source[0], source[1]) > dist_waypoints_max + track_width / 2 or is_crashed or is_offtrack or is_reversed:
+    if dist_to(x, y, source[0], source[1]) > (track_width + dist_waypoints_max) / 2:
         reward = 0.0
     if progress == 100:
         reward += score_max_complete
