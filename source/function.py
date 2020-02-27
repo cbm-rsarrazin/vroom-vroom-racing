@@ -8,7 +8,7 @@ def reward_function(params):
     prediction_weight = 0.7
     waypoint_view_min = 20
     speed_max = 4
-    dist_virtual_waypoints_ratio = 0.2
+    dist_virtual_waypoints_ratio = 0.1
 
     is_crashed = params['is_crashed']
     is_offtrack = params['is_offtrack']
