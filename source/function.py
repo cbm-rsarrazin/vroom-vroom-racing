@@ -109,10 +109,9 @@ def build_virtual_waypoints(waypoints, dist):
 
 
 def find_clothest(x, y, clothest_from, clothest_to, virtual_waypoints):
-    clothest = virtual_waypoints[clothest_from]
-    dist_min = math.sqrt(math.pow(clothest[0] - x, 2) + math.pow(clothest[1] - y, 2))
+    dist_min = 999999
 
-    for i in range(clothest_from + 1, clothest_to):
+    for i in range(clothest_from, clothest_to + 1):
         waypoint = virtual_waypoints[i]
 
         dist = math.sqrt(math.pow(waypoint[0] - x, 2) + math.pow(waypoint[1] - y, 2))
@@ -120,6 +119,8 @@ def find_clothest(x, y, clothest_from, clothest_to, virtual_waypoints):
             dist_min = dist
         else:
             return i - 1
+
+    return clothest_to
 
 
 def compute_distance_view(x, y, source_idx, waypoints, track_width):
