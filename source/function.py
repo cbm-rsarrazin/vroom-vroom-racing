@@ -2,16 +2,20 @@ import math
 
 
 def reward_function(params):
-    # parameters
+    # score parameters
     score_max_direction = 5
+    score_max_speed = 5
     score_max_complete = 20
-    prediction_weight = 0.7
+
+    # technical parameters
     speed_max = 4
-    dist_virtual_waypoints_ratio = 1/2
-    dist_target_max = 10
+    prediction_weight = 0.7
+    dist_virtual_waypoints = 1/2  # relative to track width
+    dist_target_max = 15
 
     x = params['x']
     y = params['y']
+    is_offtrack = params['is_offtrack']
     progress = params['progress']
     speed = params['speed']
     steering_angle = params['steering_angle']
@@ -21,7 +25,7 @@ def reward_function(params):
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
 
-    dist_waypoints_max = track_width * dist_virtual_waypoints_ratio
+    dist_waypoints_max = track_width * dist_virtual_waypoints
     virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max)
 
     clothest_0 = virtual_waypoints[index_waypoints[closest_waypoints[0]]]
@@ -49,9 +53,10 @@ def reward_function(params):
     direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
 
     # reward
-    reward = round(score_max_direction * direction_diff_ratio, 1)
+    reward = score_max_direction * direction_diff_ratio
+    reward += score_max_speed * speed_ratio
 
-    if outside_track(x, y, clothest_0, clothest_1, track_width):
+    if is_offtrack:
         reward = 0.0
     if progress == 100:
         reward += score_max_complete
