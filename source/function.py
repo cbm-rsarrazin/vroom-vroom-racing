@@ -54,7 +54,7 @@ def reward_function(params):
 
     # reward
     reward = score_max_direction * direction_diff_ratio
-    reward += score_max_speed * speed_ratio
+    reward *= speed_ratio
 
     if is_offtrack:
         reward = 0.0
