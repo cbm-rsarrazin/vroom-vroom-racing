@@ -4,7 +4,6 @@ import math
 def reward_function(params):
     # score parameters
     score_max_direction = 5
-    score_max_speed = 5
     score_max_complete = 20
 
     # technical parameters
