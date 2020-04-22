@@ -4,7 +4,7 @@ import math
 def reward_function(params):
     # score parameters
     score_max_direction = 5
-    score_max_speed = 5
+    score_max_speed = 2
     score_max_complete = 20
 
     # technical parameters
@@ -91,20 +91,20 @@ def reward_function(params):
     return reward
 
 
-def build_virtual_waypoints(waypoints, dist):
+def build_virtual_waypoints(waypoints, dist, source_idx, dist_target_max):
     virtual_waypoints = []
     index_waypoints = {}
 
-    for i in range(0, len(waypoints) - 1):
-        x1 = waypoints[i][0]
-        y1 = waypoints[i][1]
-        x2 = waypoints[i + 1][0]
-        y2 = waypoints[i + 1][1]
+    for i in range(source_idx, source_idx + dist_target_max):
+        x1 = waypoints[i % len(waypoints)][0]
+        y1 = waypoints[i % len(waypoints)][1]
+        x2 = waypoints[(i + 1) % len(waypoints)][0]
+        y2 = waypoints[(i + 1) % len(waypoints)][1]
 
         length = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
         nb_section = math.floor(length / dist) + 1
 
-        index_waypoints[i] = len(virtual_waypoints)
+        index_waypoints[i % len(waypoints)] = len(virtual_waypoints)
 
         for j in range(0, nb_section):
             x = x1 + (x2 - x1) * (1 / nb_section) * j
