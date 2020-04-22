@@ -11,7 +11,7 @@ def reward_function(params):
     speed_max = 4
     prediction_weight = 0.7
     dist_virtual_waypoints = 1/2  # relative to track width
-    dist_target_max = 10
+    dist_target_max = 5
 
     x = params['x']
     y = params['y']
@@ -95,7 +95,7 @@ def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
     virtual_waypoints = []
     index_waypoints = {}
 
-    for i in range(clothest_1, clothest_1 + dist_target_max + 1):
+    for i in range(clothest_1, clothest_1 + dist_target_max):
         x1 = waypoints[i % len(waypoints)][0]
         y1 = waypoints[i % len(waypoints)][1]
         x2 = waypoints[(i + 1) % len(waypoints)][0]
@@ -110,9 +110,6 @@ def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
             x = x1 + (x2 - x1) * (1 / nb_section) * j
             y = y1 + (y2 - y1) * (1 / nb_section) * j
             virtual_waypoints.append([x, y])
-
-        if len(virtual_waypoints) > dist_target_max:
-            return virtual_waypoints, index_waypoints
 
     return virtual_waypoints, index_waypoints
 
