@@ -95,7 +95,7 @@ def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
     virtual_waypoints = []
     index_waypoints = {}
 
-    for i in range(clothest_1, clothest_1 + dist_target_max):
+    for i in range(clothest_1, clothest_1 + dist_target_max + 1):
         x1 = waypoints[i % len(waypoints)][0]
         y1 = waypoints[i % len(waypoints)][1]
         x2 = waypoints[(i + 1) % len(waypoints)][0]
@@ -111,8 +111,8 @@ def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
             y = y1 + (y2 - y1) * (1 / nb_section) * j
             virtual_waypoints.append([x, y])
 
-    virtual_waypoints.append(waypoints[len(waypoints) - 1])
-    index_waypoints[len(waypoints) - 1] = len(virtual_waypoints) - 1
+        if len(virtual_waypoints) > dist_target_max:
+            return virtual_waypoints, index_waypoints
 
     return virtual_waypoints, index_waypoints
 
