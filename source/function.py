@@ -11,7 +11,7 @@ def reward_function(params):
     speed_max = 4
     prediction_weight = 0.7
     dist_virtual_waypoints = 1/2  # relative to track width
-    dist_target_max = 5
+    dist_target_max = 15
 
     x = params['x']
     y = params['y']
