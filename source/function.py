@@ -26,7 +26,7 @@ def reward_function(params):
     closest_waypoints = params['closest_waypoints']
 
     dist_waypoints_max = track_width * dist_virtual_waypoints
-    virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max)
+    virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max, closest_waypoints[0], dist_target_max)
 
     clothest_0 = virtual_waypoints[index_waypoints[closest_waypoints[0]]]
     clothest_1 = virtual_waypoints[index_waypoints[closest_waypoints[1]]]
@@ -91,11 +91,11 @@ def reward_function(params):
     return reward
 
 
-def build_virtual_waypoints(waypoints, dist, source_idx, dist_target_max):
+def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
     virtual_waypoints = []
     index_waypoints = {}
 
-    for i in range(source_idx, source_idx + dist_target_max):
+    for i in range(clothest_1, clothest_1 + dist_target_max):
         x1 = waypoints[i % len(waypoints)][0]
         y1 = waypoints[i % len(waypoints)][1]
         x2 = waypoints[(i + 1) % len(waypoints)][0]
