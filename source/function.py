@@ -163,7 +163,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
     myradians = math.atan2(coord1[1] - coord0[1], coord1[0] - coord0[0])
     mydegrees = math.degrees(myradians)
 
-    print("Waypoint0:{},"
+    print("PATH$Waypoint0:{},"
           "X:{},"
           "Y:{},"
           "heading:{},"
