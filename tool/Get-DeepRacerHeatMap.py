@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 # args
 parser = argparse.ArgumentParser(description='Generate a Deepracer Heatmap')
-parser.add_argument('--profile', required=True, help='local or aws credentials profile')
-parser.add_argument('--logstreamname', required=False, help='e.g. sim-nd2x8c3ph1d3/2019-06-06T14-39-31.940Z_3f5ddea9-6555-44d0-b1c7-ceb4b054f884/SimulationApplicationLogs')
+parser.add_argument('--profile', required=True, help='aws credentials profile')
+parser.add_argument('--logstreamname', required=True, help='e.g. sim-nd2x8c3ph1d3/2019-06-06T14-39-31.940Z_3f5ddea9-6555-44d0-b1c7-ceb4b054f884/SimulationApplicationLogs')
 
 args = parser.parse_args()
 
@@ -21,33 +21,6 @@ loggroupname = '/aws/robomaker/SimulationJobs'
 logstreamname = args.logstreamname
 profile = args.profile
 region = 'us-east-1'
-
-heatmap_lines = []
-path_lines = []
-if profile == 'local':
-    file_logs = open("logs.txt", "r")
-    f1 = file_logs.readlines()
-    for line in f1:
-        if line.startswith('HEATMAP'):
-            heatmap_lines.append(line.split('$')[1])
-        else:
-            path_lines.append(line.split('$')[1])
-
-
-def get_heatmap_data_from_local():
-    xs = []
-    ys = []
-
-    print('Parsing Data...')
-    for line in heatmap_lines:
-        split = line.split(',')
-        x = float(split[0])
-        y = float(split[1])
-        xs.append(x)
-        ys.append(y)
-        print("X: {}, Y: {}".format(x, y))
-
-    return xs, ys
 
 
 def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
@@ -78,6 +51,7 @@ def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
             )
         events += response['events']
         count += len(response['events'])
+        print(count)
 
         # while
         if 'nextToken' not in response.keys():
@@ -85,7 +59,10 @@ def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
             break
         else:
             nextToken = response['nextToken']
+            # break # unhash out for testing
+        # print (nextToken)
 
+    # print (len(events))
     xs = []
     ys = []
     print('Parsing Data...')
@@ -95,78 +72,14 @@ def get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
         y = float(split[3])
         xs.append(x)
         ys.append(y)
+        # print("X: {}, Y: {}".format(x,y))
 
+    # print(len(xs))
+    # print(len(ys))
     return xs, ys
 
 
-def get_coords_from_local():
-    coords = []
-    print('Parsing Data...')
-    for line in path_lines:
-        commasplit = line.split(',')
-
-        waypoint = int(commasplit[0].split(':')[1].strip())
-        x = float(commasplit[1].split(':')[1].strip())
-        y = float(commasplit[2].split(':')[1].strip())
-        heading = float(commasplit[3].split(':')[1].strip())
-        trackwidth = float(commasplit[4].split(':')[1].strip())
-        steering = float(commasplit[5].split(':')[1].strip())
-        steps = float(commasplit[6].split(':')[1].strip())
-        reward = float(commasplit[7].split(':')[1].strip())
-        vehicle_x = float(commasplit[8].split(':')[1].strip())
-        vehicle_y = float(commasplit[9].split(':')[1].strip())
-        vehicle_source_x = float(commasplit[10].split(':')[1].strip())
-        vehicle_source_y = float(commasplit[11].split(':')[1].strip())
-        vehicle_target_x = float(commasplit[12].split(':')[1].strip())
-        vehicle_target_y = float(commasplit[13].split(':')[1].strip())
-        vehicle_target_nearest_x = float(commasplit[14].split(':')[1].strip())
-        vehicle_target_nearest_y = float(commasplit[15].split(':')[1].strip())
-        vehicle_clothest_0_x = float(commasplit[16].split(':')[1].strip())
-        vehicle_clothest_0_y = float(commasplit[17].split(':')[1].strip())
-        vehicle_clothest_1_x = float(commasplit[18].split(':')[1].strip())
-        vehicle_clothest_1_y = float(commasplit[19].split(':')[1].strip())
-        vehicle_heading = float(commasplit[20].split(':')[1].strip())
-        vehicle_best_dir = float(commasplit[21].split(':')[1].strip())
-        vehicle_steering = float(commasplit[22].split(':')[1].strip())
-        vehicle_predicted = float(commasplit[23].split(':')[1].strip())
-        vehicle_target_distance_view = float(commasplit[24].split(':')[1].strip())
-        vehicle_target_distance = float(commasplit[25].split(':')[1].strip())
-        vehicle_speed = float(commasplit[26].split(':')[1].strip())
-        vehicle_speed_ratio = float(commasplit[27].split(':')[1].strip())
-
-        coords.append({'waypoint': waypoint,
-                       'x': x,
-                       'y': y,
-                       'heading': heading,
-                       'trackwidth': trackwidth,
-                       'steering': steering,
-                       'steps': steps,
-                       'reward': reward,
-                       'vehicle_x': vehicle_x,
-                       'vehicle_y': vehicle_y,
-                       'vehicle_source_x': vehicle_source_x,
-                       'vehicle_source_y': vehicle_source_y,
-                       'vehicle_target_x': vehicle_target_x,
-                       'vehicle_target_y': vehicle_target_y,
-                       'vehicle_target_nearest_x': vehicle_target_nearest_x,
-                       'vehicle_target_nearest_y': vehicle_target_nearest_y,
-                       'vehicle_clothest_0_x': vehicle_clothest_0_x,
-                       'vehicle_clothest_0_y': vehicle_clothest_0_y,
-                       'vehicle_clothest_1_x': vehicle_clothest_1_x,
-                       'vehicle_clothest_1_y': vehicle_clothest_1_y,
-                       'vehicle_heading': vehicle_heading,
-                       'vehicle_best_dir': vehicle_best_dir,
-                       'vehicle_steering': vehicle_steering,
-                       'vehicle_predicted': vehicle_predicted,
-                       'vehicle_target_distance_view': vehicle_target_distance_view,
-                       'vehicle_target_distance': vehicle_target_distance,
-                       'vehicle_speed': vehicle_speed,
-                       'vehicle_speed_ratio': vehicle_speed_ratio})
-
-    return coords
-
-
-def get_coords(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
+def get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
     filterPattern='Waypoint0'
     nextToken = ''
     count = 0
@@ -193,6 +106,7 @@ def get_coords(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
             )
         events += response['events']
         count += len(response['events'])
+        print(count)
 
         # while
         if 'nextToken' not in response.keys():
@@ -200,6 +114,10 @@ def get_coords(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
             break
         else:
             nextToken = response['nextToken']
+            # break # unhash out for testing
+        # print (nextToken)
+
+    print(len(events))
 
     coords = []
     print('Parsing Waypoint Data...')
@@ -263,12 +181,11 @@ def get_coords(loggroupname, logstreamname, starttimeepoch, endtimeepoch):
                        'vehicle_target_distance': vehicle_target_distance,
                        'vehicle_speed': vehicle_speed,
                        'vehicle_speed_ratio': vehicle_speed_ratio})
+        # print("X: {}, Y: {}".format(x,y))
 
-    return coords
-
-
-def get_string_path_data(coords):
+    # print(len(coords))
     uniquewaypoints = list({v['waypoint']: v for v in coords}.values())  # get unique items in list of dicts
+    print("Unique Waypoints:{}".format(len(uniquewaypoints)))
     uniquewaypoints = sorted(uniquewaypoints, key=lambda i: i['waypoint'])
 
     # center_string_path_data
@@ -323,14 +240,13 @@ def round_2(val):
 
 # MAIN
 
-# collect heatmap data
-if profile == 'local':
-    heatmap_data = get_heatmap_data_from_local()
-else:
-    session = boto3.Session(profile_name=profile, region_name=region)
-    logs_client = session.client('logs')
-    heatmap_data = get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
+session = boto3.Session(profile_name=profile, region_name=region)
+
+logs_client = session.client('logs')
+
+# collect heatmap data
+heatmap_data = get_heatmap_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 xs = heatmap_data[0]
 ys = heatmap_data[1]
 
@@ -342,12 +258,7 @@ plt.xlabel('x axis')
 plt.ylabel('y axis')
 
 # collect track limits data
-if profile == 'local':
-    coords = get_coords_from_local()
-else:
-    coords = get_coords(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
-
-string_path_data = get_string_path_data(coords)
+string_path_data = get_string_path_data(loggroupname, logstreamname, starttimeepoch, endtimeepoch)
 
 coords = list(string_path_data[3])
 uniquewaypoints = list({v['waypoint']: v for v in coords}.values())
@@ -465,11 +376,14 @@ for i in range(len(coords)):
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
 
-    if reward > 0 and i % 1 == 0:
-        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red', alpha=0.3)
-
+    if reward > 0 and i % 500 == 0:
+        plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red', alpha=1)
         plt.scatter(vehicle_x, vehicle_y, color='blue')
-        plt.scatter(target_x, target_y, color='red')
+        # plt.scatter(target_x, target_y, color='red')
+
+for i in range(len(coords)):
+    w = coords[i]
+    plt.scatter(w['x'], w['y'], color='green')
 
 
 # print
@@ -541,7 +455,7 @@ print('avg_target_distance: ' + str(avg_target_distance))
 print('avg_view_distance: ' + str(avg_distance_view))
 print('min_view_distance: ' + str(min_distance_view))
 print('max_view_distance: ' + str(max_distance_view))
-# print('rewards: ' + str(sorted(rewards)))
+print('rewards: ' + str(sorted(rewards)))
 print('coords: ' + str(len(coords)))
 
 

@@ -1,3 +1,5 @@
+import random
+
 from source.function import reward_function
 
 waypoints = [[2.9685466767304676, 0.3736381785611765],
@@ -72,7 +74,15 @@ waypoints = [[2.9685466767304676, 0.3736381785611765],
              [2.8389740478559014, 0.38388247153447946]]
 
 
-def random_params(iteration):
+def random_params():
+    waypoint_nb = len(waypoints)
+    waypoint_index = random.randint(0, waypoint_nb - 1)
+    waypoint = waypoints[waypoint_index]
+
+    gap = 0.3
+    waypoint_gap_x = -gap + random.random() * gap * 2
+    waypoint_gap_y = -gap + random.random() * gap * 2
+
     return {
         'is_local': True,
         'is_crashed': False,
@@ -80,11 +90,11 @@ def random_params(iteration):
         'is_reversed': False,
         'speed': 1.0,
         'progress': 5.0,
-        'track_width': 0.6,
+        'track_width': 1,
         'heading': 0.0,
-        'closest_waypoints': [3, 4],
-        'x': 2.5,
-        'y': 0.67,
+        'closest_waypoints': [waypoint_index % waypoint_nb, (waypoint_index + 1) % waypoint_nb],
+        'x': waypoint[0] + 0.01 + waypoint_gap_x,
+        'y': waypoint[1] + 0.01 + waypoint_gap_y,
         'steering_angle': 0.0,
         'steps': 0.0,
         'waypoints': waypoints
@@ -92,15 +102,15 @@ def random_params(iteration):
 
 
 def main():
-    iterations = 1
+    iterations = 100
 
     for i in range(0, iterations):
-        params = random_params(i)
+        params = random_params()
 
         score = reward_function(params)
         log = 'HEATMAP$' + str(params['x']) + ',' + str(params['y'])
         print(log)
-        # print('score: ' + log)
+        print('score: ' + str(score))
 
 
 if __name__ == "__main__":

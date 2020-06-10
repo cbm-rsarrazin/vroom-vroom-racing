@@ -2,20 +2,14 @@ import math
 
 
 def reward_function(params):
-    # score parameters
+    # parameters
     score_max_direction = 5
-    score_max_speed = 2
     score_max_complete = 20
-
-    # technical parameters
-    speed_max = 4
     prediction_weight = 0.7
-    dist_virtual_waypoints = 1/2  # relative to track width
-    dist_target_max = 15
+    speed_max = 4
 
     x = params['x']
     y = params['y']
-    is_offtrack = params['is_offtrack']
     progress = params['progress']
     speed = params['speed']
     steering_angle = params['steering_angle']
@@ -24,21 +18,17 @@ def reward_function(params):
     heading = params['heading']
     waypoints = params['waypoints']
     closest_waypoints = params['closest_waypoints']
+    is_offtrack = params['is_offtrack']
 
-    dist_waypoints_max = track_width * dist_virtual_waypoints
-    virtual_waypoints, index_waypoints = build_virtual_waypoints(waypoints, dist_waypoints_max, closest_waypoints[0], dist_target_max)
+    clothest_0 = waypoints[closest_waypoints[0]]
+    clothest_1 = waypoints[closest_waypoints[1]]
 
-    clothest_0 = virtual_waypoints[index_waypoints[closest_waypoints[0]]]
-    clothest_1 = virtual_waypoints[index_waypoints[closest_waypoints[1]]]
-    source_idx = find_clothest(x, y, index_waypoints[closest_waypoints[0]], index_waypoints[closest_waypoints[1]], virtual_waypoints)
+    source_idx = closest_waypoints[0]
+    target_distance_view, dist, nearest = compute_distance_view(x, y, source_idx, waypoints, track_width)
+    target_idx = source_idx + target_distance_view
 
-    # find target
-    target_distance_view, dist_nearest, nearest = compute_distance_view(x, y, source_idx, virtual_waypoints, track_width)
-    target_distance = min(target_distance_view, dist_target_max)
-    target_idx = source_idx + target_distance
-
-    source = virtual_waypoints[source_idx % len(virtual_waypoints)]
-    target = virtual_waypoints[target_idx % len(virtual_waypoints)]
+    source = waypoints[source_idx % len(waypoints)]
+    target = waypoints[target_idx % len(waypoints)]
 
     # best dir
     best_dir = nor(atan2_deg(x, y, target[0], target[1]))
@@ -53,13 +43,12 @@ def reward_function(params):
     direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
 
     # reward
-    reward = score_max_direction * direction_diff_ratio
-    reward += score_max_speed * speed_ratio
+    reward = round(score_max_direction * direction_diff_ratio, 1)
 
-    if is_offtrack:
-        reward = 0.0
     if progress == 100:
         reward += score_max_complete
+    if is_offtrack:
+        reward = 0.0
 
     log(waypoints,
         closest_waypoints,
@@ -84,49 +73,11 @@ def reward_function(params):
         steering,
         predicted,
         target_distance_view,
-        target_distance,
+        dist,
         speed,
         speed_ratio)
 
     return reward
-
-
-def build_virtual_waypoints(waypoints, dist, clothest_1, dist_target_max):
-    virtual_waypoints = []
-    index_waypoints = {}
-
-    for i in range(clothest_1, clothest_1 + dist_target_max):
-        x1 = waypoints[i % len(waypoints)][0]
-        y1 = waypoints[i % len(waypoints)][1]
-        x2 = waypoints[(i + 1) % len(waypoints)][0]
-        y2 = waypoints[(i + 1) % len(waypoints)][1]
-
-        length = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
-        nb_section = math.floor(length / dist) + 1
-
-        index_waypoints[i % len(waypoints)] = len(virtual_waypoints)
-
-        for j in range(0, nb_section):
-            x = x1 + (x2 - x1) * (1 / nb_section) * j
-            y = y1 + (y2 - y1) * (1 / nb_section) * j
-            virtual_waypoints.append([x, y])
-
-    return virtual_waypoints, index_waypoints
-
-
-def find_clothest(x, y, clothest_from, clothest_to, virtual_waypoints):
-    dist_min = 999999
-
-    for i in range(clothest_from, clothest_to + 1):
-        waypoint = virtual_waypoints[i]
-
-        dist = math.sqrt(math.pow(waypoint[0] - x, 2) + math.pow(waypoint[1] - y, 2))
-        if dist_min > dist:
-            dist_min = dist
-        else:
-            return i - 1
-
-    return clothest_to
 
 
 def compute_distance_view(x, y, source_idx, waypoints, track_width):
@@ -146,11 +97,6 @@ def compute_distance_view(x, y, source_idx, waypoints, track_width):
         target_idx = source_idx + target_distance_view
 
 
-def outside_track(x, y, clothest_0, clothest_1, track_width):
-    dist, nearest = distance_point_to_line(x, y, clothest_0[0], clothest_0[1], clothest_1[0], clothest_1[1])
-    return dist > track_width / 2
-
-
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
         vehicle_x, vehicle_y, vehicle_source_x, vehicle_source_y, vehicle_target_x,
         vehicle_target_y, vehicle_target_nearest_x, vehicle_target_nearest_y,
@@ -163,7 +109,7 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
     myradians = math.atan2(coord1[1] - coord0[1], coord1[0] - coord0[0])
     mydegrees = math.degrees(myradians)
 
-    print("PATH$Waypoint0:{},"
+    print("Waypoint0:{},"
           "X:{},"
           "Y:{},"
           "heading:{},"
@@ -191,34 +137,34 @@ def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward
           "vehicle_target_distance:{},"
           "vehicle_speed:{},"
           "vehicle_speed_ratio:{},".format(
-            closest_waypoints[0],
-            coord0[0],
-            coord0[1],
-            mydegrees,
-            track_width,
-            steering_angle,
-            steps,
-            reward,
-            vehicle_x,
-            vehicle_y,
-            vehicle_source_x,
-            vehicle_source_y,
-            vehicle_target_x,
-            vehicle_target_y,
-            vehicle_target_nearest_x,
-            vehicle_target_nearest_y,
-            vehicle_clothest_0_x,
-            vehicle_clothest_0_y,
-            vehicle_clothest_1_x,
-            vehicle_clothest_1_y,
-            vehicle_heading,
-            vehicle_best_dir,
-            vehicle_steering,
-            vehicle_predicted,
-            target_distance_view,
-            target_distance,
-            speed,
-            speed_ratio))
+        closest_waypoints[0],
+        coord0[0],
+        coord0[1],
+        mydegrees,
+        track_width,
+        steering_angle,
+        steps,
+        reward,
+        vehicle_x,
+        vehicle_y,
+        vehicle_source_x,
+        vehicle_source_y,
+        vehicle_target_x,
+        vehicle_target_y,
+        vehicle_target_nearest_x,
+        vehicle_target_nearest_y,
+        vehicle_clothest_0_x,
+        vehicle_clothest_0_y,
+        vehicle_clothest_1_x,
+        vehicle_clothest_1_y,
+        vehicle_heading,
+        vehicle_best_dir,
+        vehicle_steering,
+        vehicle_predicted,
+        target_distance_view,
+        target_distance,
+        speed,
+        speed_ratio))
 
 
 # HELPER
