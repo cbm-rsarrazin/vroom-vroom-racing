@@ -102,14 +102,26 @@ def random_params():
 
 
 def main():
-    iterations = 100
-
-    for i in range(0, iterations):
-        params = random_params()
+    for waypoint_index in range(0, len(waypoints) - 1):
+        waypoint = waypoints[waypoint_index]
+        params = {
+            'is_local': True,
+            'is_crashed': False,
+            'is_offtrack': False,
+            'is_reversed': False,
+            'speed': 1.0,
+            'progress': 5.0,
+            'track_width': 1,
+            'heading': 0.0,
+            'closest_waypoints': [waypoint_index, waypoint_index + 1],
+            'x': waypoint[0] + 0.01,
+            'y': waypoint[1] + 0.01,
+            'steering_angle': 0.0,
+            'steps': 0.0,
+            'waypoints': waypoints
+        }
 
         score = reward_function(params)
-        log = 'HEATMAP$' + str(params['x']) + ',' + str(params['y'])
-        print(log)
         print('score: ' + str(score))
 
 

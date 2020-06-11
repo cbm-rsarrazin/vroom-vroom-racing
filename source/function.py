@@ -7,6 +7,7 @@ def reward_function(params):
     score_max_complete = 20
     prediction_weight = 0.7
     speed_max = 4
+    optimization_gap = 16
 
     x = params['x']
     y = params['y']
@@ -24,7 +25,8 @@ def reward_function(params):
     clothest_1 = waypoints[closest_waypoints[1]]
 
     source_idx = closest_waypoints[0]
-    target_distance_view, dist, nearest = compute_distance_view(x, y, source_idx, waypoints, track_width)
+    target_distance_view, dist, nearest = compute_distance_view(x, y, source_idx, waypoints,
+                                                                optimization_gap, track_width)
     target_idx = source_idx + target_distance_view
 
     source = waypoints[source_idx % len(waypoints)]
@@ -80,21 +82,34 @@ def reward_function(params):
     return reward
 
 
-def compute_distance_view(x, y, source_idx, waypoints, track_width):
-    target_distance_view = 2
+def compute_distance_view(x, y, source_idx, waypoints, optimization_gap, track_width):
+    target_distance_view = optimization_gap
     target_idx = source_idx + target_distance_view
 
     while True:
-        target = waypoints[target_idx % len(waypoints)]
+        dist, nearest = point_visible(x, y, source_idx, target_idx, waypoints, track_width / 2)
 
-        for i in range(source_idx + 1, target_idx):
-            current = waypoints[i % len(waypoints)]
-            dist, nearest = distance_point_to_line(current[0], current[1], x, y, target[0], target[1])
-            if dist > track_width / 2:
+        if dist > -1:
+            if optimization_gap > 1:
+                target_distance_view = target_distance_view - optimization_gap
+                optimization_gap = int(optimization_gap / 2)
+            else:
                 return target_distance_view, dist, nearest
 
-        target_distance_view = target_distance_view + 1
+        target_distance_view = target_distance_view + optimization_gap
         target_idx = source_idx + target_distance_view
+
+
+def point_visible(x, y, source_idx, target_idx, waypoints, dist_max):
+    target = waypoints[target_idx % len(waypoints)]
+
+    for i in range(source_idx + 1, target_idx):
+        current = waypoints[i % len(waypoints)]
+        dist, nearest = distance_point_to_line(current[0], current[1], x, y, target[0], target[1])
+        if dist >= dist_max:
+            return dist, nearest
+
+    return -1, [-1, -1]
 
 
 def log(waypoints, closest_waypoints, track_width, steering_angle, steps, reward,
