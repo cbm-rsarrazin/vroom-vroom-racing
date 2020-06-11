@@ -6,7 +6,7 @@ def reward_function(params):
     score_max_direction = 5
     score_max_complete = 20
     prediction_weight = 0.7
-    speed_max = 4
+    speed_max = 2
     optimization_gap = 16
 
     x = params['x']

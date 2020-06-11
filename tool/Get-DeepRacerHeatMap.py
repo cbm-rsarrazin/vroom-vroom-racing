@@ -376,7 +376,7 @@ for i in range(len(coords)):
     target_x = coord['vehicle_target_x']
     target_y = coord['vehicle_target_y']
 
-    if reward > 0 and i % 1000 == 0:
+    if reward > 0 and i % 100 == 0:
         plt.plot([vehicle_x, target_x], [vehicle_y, target_y], color='red', alpha=1)
         plt.scatter(vehicle_x, vehicle_y, color='blue')
         # plt.scatter(target_x, target_y, color='red')
