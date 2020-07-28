@@ -109,9 +109,9 @@ if __name__ == "__main__":
     score_max_direction = 5
     score_max_complete = 50
 
-    waypoints = np.load("../tracks/reInvent2019_wide.npy")
-    x = 7
-    y = 2
+    waypoints = np.load('tracks/reInvent2019_wide.npy')
+    x = 6
+    y = 1
     heading = 0
     track_width = 1
     speed = 4
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     reward += direction_diff_ratio * score_max_direction
     print("direction: " + str(direction_diff_ratio))
 
-    # ----------------------- Function
+    # ----------------------- Plot
 
     best_x = []
     best_y = []
