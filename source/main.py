@@ -107,14 +107,16 @@ if __name__ == "__main__":
     # ----------------------- Params
 
     # reInvent2019_wide
-    # bezier_from_waypoint = 10
-    # nb_waypoint_used = 10
-    # nb_point_best_race = 40
+    bezier_from_waypoint = 10
+    nb_waypoint_used = 10
+    nb_point_best_race = 40
+    total_nb_steps = 85
 
     # FS_June2020
-    bezier_from_waypoint = 0
-    nb_waypoint_used = 30
-    nb_point_best_race = 100
+    # bezier_from_waypoint = 0
+    # nb_waypoint_used = 30
+    # nb_point_best_race = 100
+    # total_nb_steps = 100
 
     speed_max = 4
     score_max_speed = 10
@@ -122,12 +124,12 @@ if __name__ == "__main__":
     score_max_direction = 5
     score_max_complete = 50
 
-    waypoints = np.load('tracks/FS_June2020.npy')
-    x = 2.5
-    y = -3
-    heading = 180
+    waypoints = np.load('tracks/reInvent2019_wide.npy')
+    x = 6.7
+    y = 2
+    heading = 0
     track_width = 1
-    speed = 2
+    speed = 3
     progress = 50
     is_offtrack = False
     steps = 1
@@ -150,11 +152,11 @@ if __name__ == "__main__":
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = best_speed[nearest_index]
+    current_best_speed = max(0.5, best_speed[nearest_index])
     current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
-    if speed_ratio >= 0.7:
-        speed_ratio = 1.0
+    if speed_ratio < 0.6:
+        speed_ratio = 0.0
     reward += speed_ratio * score_max_speed
     print("speed: " + str(speed_ratio))
 

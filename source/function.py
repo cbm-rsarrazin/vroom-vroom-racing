@@ -4,11 +4,14 @@ import numpy as np
 import scipy.interpolate as si
 from scipy.spatial import distance
 
-bezier_from_waypoint = 0
-nb_waypoint_used = 30
-nb_point_best_race = 100
+bezier_from_waypoint = 10
+nb_waypoint_used = 10
+nb_point_best_race = 40
+total_nb_steps = 85
 
 speed_max = 4
+
+score_by_step = 10
 score_max_speed = 10
 score_max_distance = 15
 score_max_direction = 5
@@ -23,7 +26,7 @@ def reward_function(params):
     track_width = params['track_width']
     speed = params['speed']
     progress = params['progress']
-    is_offtrack = params['is_offtrack']
+    steps = params['steps']
 
     reward = 1e-3
 
@@ -41,11 +44,11 @@ def reward_function(params):
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = best_speed[nearest_index]
+    current_best_speed = max(0.5, best_speed[nearest_index])
     current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
-    if speed_ratio >= 0.7:
-        speed_ratio = 1.0
+    if speed_ratio < 0.6:
+        speed_ratio = 0.0
     reward += speed_ratio * score_max_speed
     print("speed: " + str(speed_ratio))
 
@@ -63,8 +66,8 @@ def reward_function(params):
     # other reward
     if progress == 100:
         reward += score_max_complete
-    if is_offtrack:
-        reward = 0.0
+    if steps % 100 == 0 and progress > (steps / total_nb_steps) * 100:
+        reward += score_by_step
 
     return reward
 
