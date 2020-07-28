@@ -3,16 +3,17 @@ import math
 import numpy as np
 import scipy.interpolate as si
 from scipy.spatial import distance
-from shapely.geometry import Point, Polygon
 
+bezier_from_waypoint = 0
 nb_waypoint_used = 30
 nb_point_best_race = 100
 
+speed_max = 4
 score_max_speed = 10
 score_max_distance = 15
 score_max_direction = 5
 score_max_complete = 50
-speed_max = 4
+
 
 def reward_function(params):
     x = params['x']
@@ -27,11 +28,12 @@ def reward_function(params):
     reward = 1e-3
 
     # distance reward
-    best_race = get_best_race(waypoints, nb_waypoint_used, nb_point_best_race)
+    best_race = get_best_race(waypoints, bezier_from_waypoint, nb_waypoint_used, nb_point_best_race)
     nearest_index, nearest_interval_indexes = get_nearest_points(best_race, x, y)
-    poly_race = Polygon(best_race)
-    dist = poly_race.distance(Point(x, y))
-    dist_ratio = 0
+    nearest1 = best_race[nearest_interval_indexes[0]]
+    nearest2 = best_race[nearest_interval_indexes[1]]
+    dist = distance_to_line(x, y, nearest1, nearest2)
+    dist_ratio = 0.0
     if dist < track_width:
         dist_ratio = (track_width - dist) / track_width
     reward += dist_ratio * score_max_distance
@@ -41,7 +43,9 @@ def reward_function(params):
     best_speed = get_best_speed(best_race)
     current_best_speed = best_speed[nearest_index]
     current_speed = speed / speed_max
-    speed_ratio = 1 - abs(current_speed - current_best_speed)
+    speed_ratio = 1.0 - abs(current_speed - current_best_speed)
+    if speed_ratio >= 0.7:
+        speed_ratio = 1.0
     reward += speed_ratio * score_max_speed
     print("speed: " + str(speed_ratio))
 
@@ -50,7 +54,7 @@ def reward_function(params):
                              best_race[nearest_interval_indexes[1]][0], best_race[nearest_interval_indexes[1]][1]))
     heading = nor(heading)
     direction_diff = abs(angle_min_diff(heading, best_dir))
-    direction_diff_ratio = 0
+    direction_diff_ratio = 0.0
     if direction_diff <= 30:
         direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
     reward += direction_diff_ratio * score_max_direction
@@ -84,14 +88,14 @@ def get_best_speed(best_race):
     return best_speed
 
 
-def get_best_race(waypoints, nb_waypoint, nb_point):
+def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
     waypoint_x = []
     waypoint_y = []
     gap = int(len(waypoints) / nb_waypoint)
-    for i in range(0, len(waypoints)):
+    for i in range(loop_from, len(waypoints) + loop_from):
         if i % gap == 0:
-            waypoint_x.append(waypoints[i][0])
-            waypoint_y.append(waypoints[i][1])
+            waypoint_x.append(waypoints[i % len(waypoints)][0])
+            waypoint_y.append(waypoints[i % len(waypoints)][1])
 
     k = 3
     knot_space = range(len(waypoint_x))
@@ -153,3 +157,10 @@ def angle_min_diff(x, y):
     if arg > 180:
         arg = arg - 360
     return -arg
+
+
+def distance_to_line(x, y, p1, p2):
+    np1 = np.array(p1)
+    np2 = np.array(p2)
+    np3 = np.array([x, y])
+    return abs(np.cross(np2 - np1, np3 - np1) / np.linalg.norm(np2 - np1))
