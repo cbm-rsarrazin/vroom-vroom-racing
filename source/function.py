@@ -9,11 +9,11 @@ nb_waypoint_used = 30
 nb_point_best_race = 100
 total_nb_steps = 100
 
-speed_min = 2
 speed_max = 4
+speed_granularity = 3
 
 score_by_step = 50
-score_max_speed = 20
+score_max_speed = 15
 score_max_distance = 15
 score_max_direction = 5
 score_max_complete = 100
@@ -44,9 +44,8 @@ def reward_function(params):
 
     # speed reward
     best_speed = get_best_speed(best_race)
-
-    current_best_speed = float(round(best_speed[nearest_index]))
-    current_speed = (speed - speed_min) / (speed_max - speed_min)
+    current_best_speed = max(best_speed[nearest_index], 1.0 / speed_granularity)
+    current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
     reward += speed_ratio * score_max_speed
 
@@ -84,6 +83,7 @@ def get_best_speed(best_race):
 
     max_diff = max(angle_diff)
     best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+    best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
 
     return best_speed
 

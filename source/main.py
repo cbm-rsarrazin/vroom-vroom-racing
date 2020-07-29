@@ -22,6 +22,7 @@ def get_best_speed(best_race):
 
     max_diff = max(angle_diff)
     best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+    best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
 
     return best_speed
 
@@ -119,11 +120,11 @@ if __name__ == "__main__":
     nb_point_best_race = 100
     total_nb_steps = 100
 
-    speed_min = 2
     speed_max = 4
+    speed_granularity = 3
 
     score_by_step = 50
-    score_max_speed = 20
+    score_max_speed = 15
     score_max_distance = 15
     score_max_direction = 5
     score_max_complete = 100
@@ -160,9 +161,8 @@ if __name__ == "__main__":
 
     # speed reward
     best_speed = get_best_speed(best_race)
-
-    current_best_speed = float(round(best_speed[nearest_index]))
-    current_speed = (speed - speed_min) / (speed_max - speed_min)
+    current_best_speed = max(best_speed[nearest_index], 1.0 / speed_granularity)
+    current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
     reward += speed_ratio * score_max_speed
 
@@ -177,12 +177,14 @@ if __name__ == "__main__":
     reward += direction_diff_ratio * score_max_direction
 
     # ----------------------- Plot
-    print("distance: " + str(dist_ratio))
-    print("best speed: " + str(best_speed[nearest_index]))
-    print("current best speed: " + str(current_best_speed))
+    print("\ndistance: " + str(dist))
+    print("distance ratio: " + str(dist_ratio))
+    print("\ncurrent best speed: " + str(current_best_speed))
     print("current speed: " + str(current_speed))
     print("speed ratio: " + str(speed_ratio))
-    print("direction: " + str(direction_diff_ratio))
+    print("\ndirection: " + str(direction_diff_ratio))
+    print("best direction: " + str(best_dir))
+    print("direction ratio: " + str(direction_diff_ratio))
 
     best_x = []
     best_y = []
