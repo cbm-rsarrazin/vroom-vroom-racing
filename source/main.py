@@ -1,4 +1,5 @@
 import math
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -118,18 +119,26 @@ if __name__ == "__main__":
     nb_point_best_race = 100
     total_nb_steps = 100
 
+    speed_min = 2
     speed_max = 4
-    score_max_speed = 10
+
+    score_by_step = 50
+    score_max_speed = 20
     score_max_distance = 15
     score_max_direction = 5
-    score_max_complete = 50
+    score_max_complete = 100
 
     waypoints = np.load('tracks/FS_June2020.npy')
-    x = 6.7
-    y = 2
-    heading = 0
+    center_line = waypoints[:, 0:2]
+    rand_waypoint = center_line[random.randint(0, len(center_line) - 1)]
+    rand_dist = random.random()
+    rand_angle = random.random() * math.pi
+
+    x = rand_waypoint[0] + rand_dist * math.cos(rand_angle)
+    y = rand_waypoint[1] + rand_dist * math.sin(rand_angle)
+    heading = 10
     track_width = 1
-    speed = 3
+    speed = 2
     progress = 50
     is_offtrack = False
     steps = 1
@@ -148,17 +157,14 @@ if __name__ == "__main__":
     if dist < track_width:
         dist_ratio = (track_width - dist) / track_width
     reward += dist_ratio * score_max_distance
-    print("distance: " + str(dist_ratio))
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = max(0.5, best_speed[nearest_index])
-    current_speed = speed / speed_max
+
+    current_best_speed = float(round(best_speed[nearest_index]))
+    current_speed = (speed - speed_min) / (speed_max - speed_min)
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
-    if speed_ratio < 0.6:
-        speed_ratio = 0.0
     reward += speed_ratio * score_max_speed
-    print("speed: " + str(speed_ratio))
 
     # direction reward
     best_dir = nor(atan2_deg(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1],
@@ -169,9 +175,14 @@ if __name__ == "__main__":
     if direction_diff <= 30:
         direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
     reward += direction_diff_ratio * score_max_direction
-    print("direction: " + str(direction_diff_ratio))
 
     # ----------------------- Plot
+    print("distance: " + str(dist_ratio))
+    print("best speed: " + str(best_speed[nearest_index]))
+    print("current best speed: " + str(current_best_speed))
+    print("current speed: " + str(current_speed))
+    print("speed ratio: " + str(speed_ratio))
+    print("direction: " + str(direction_diff_ratio))
 
     best_x = []
     best_y = []

@@ -9,13 +9,14 @@ nb_waypoint_used = 30
 nb_point_best_race = 100
 total_nb_steps = 100
 
+speed_min = 2
 speed_max = 4
 
-score_by_step = 10
-score_max_speed = 10
+score_by_step = 50
+score_max_speed = 20
 score_max_distance = 15
 score_max_direction = 5
-score_max_complete = 50
+score_max_complete = 100
 
 
 def reward_function(params):
@@ -40,17 +41,14 @@ def reward_function(params):
     if dist < track_width:
         dist_ratio = (track_width - dist) / track_width
     reward += dist_ratio * score_max_distance
-    print("distance: " + str(dist_ratio))
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = max(0.5, best_speed[nearest_index])
-    current_speed = speed / speed_max
+
+    current_best_speed = float(round(best_speed[nearest_index]))
+    current_speed = (speed - speed_min) / (speed_max - speed_min)
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
-    if speed_ratio < 0.6:
-        speed_ratio = 0.0
     reward += speed_ratio * score_max_speed
-    print("speed: " + str(speed_ratio))
 
     # direction reward
     best_dir = nor(atan2_deg(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1],
@@ -61,12 +59,11 @@ def reward_function(params):
     if direction_diff <= 30:
         direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
     reward += direction_diff_ratio * score_max_direction
-    print("direction: " + str(direction_diff_ratio))
 
     # other reward
     if progress == 100:
         reward += score_max_complete
-    if steps % 100 == 0 and progress > (steps / total_nb_steps) * 100:
+    if steps % total_nb_steps == 0 and progress > (steps / total_nb_steps) * 100:
         reward += score_by_step
 
     return reward
