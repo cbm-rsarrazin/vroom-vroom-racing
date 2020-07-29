@@ -4,10 +4,10 @@ import numpy as np
 import scipy.interpolate as si
 from scipy.spatial import distance
 
-bezier_from_waypoint = 10
-nb_waypoint_used = 10
-nb_point_best_race = 40
-total_nb_steps = 85
+bezier_from_waypoint = 0
+nb_waypoint_used = 30
+nb_point_best_race = 100
+total_nb_steps = 100
 
 speed_max = 4
 
