@@ -7,12 +7,13 @@ from scipy.spatial import distance
 bezier_from_waypoint = 0
 nb_waypoint_used = 30
 nb_point_best_race = 100
-total_nb_steps = 100
+steps_gap = 100
+steps_total = 457
 
 speed_max = 4
 speed_granularity = 3
 
-score_by_step = 50
+score_max_step = 15
 score_max_speed = 15
 score_max_distance = 15
 score_max_direction = 5
@@ -28,6 +29,7 @@ def reward_function(params):
     speed = params['speed']
     progress = params['progress']
     steps = params['steps']
+    is_offtrack = params['is_offtrack']
 
     reward = 1e-3
 
@@ -60,10 +62,12 @@ def reward_function(params):
     reward += direction_diff_ratio * score_max_direction
 
     # other reward
-    if progress == 100:
+    if is_offtrack:
+        reward = 1e-3
+    elif progress == 100:
         reward += score_max_complete
-    if steps % total_nb_steps == 0 and progress > (steps / total_nb_steps) * 100:
-        reward += score_by_step
+    elif steps % steps_gap == 0 and progress > (steps / steps_total) * 100:
+        reward += score_max_step
 
     return reward
 

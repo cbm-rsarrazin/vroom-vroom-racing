@@ -112,18 +112,20 @@ if __name__ == "__main__":
     # bezier_from_waypoint = 10
     # nb_waypoint_used = 10
     # nb_point_best_race = 40
-    # total_nb_steps = 85
+    # steps_gap = 38
+    # steps_total = 173
 
     # FS_June2020
     bezier_from_waypoint = 0
     nb_waypoint_used = 30
     nb_point_best_race = 100
-    total_nb_steps = 100
+    steps_gap = 90
+    steps_total = 457
 
     speed_max = 4
     speed_granularity = 3
 
-    score_by_step = 50
+    score_max_step = 15
     score_max_speed = 15
     score_max_distance = 15
     score_max_direction = 5
@@ -182,7 +184,7 @@ if __name__ == "__main__":
     print("\ncurrent best speed: " + str(current_best_speed))
     print("current speed: " + str(current_speed))
     print("speed ratio: " + str(speed_ratio))
-    print("\ndirection: " + str(direction_diff_ratio))
+    print("\ndirection: " + str(direction_diff))
     print("best direction: " + str(best_dir))
     print("direction ratio: " + str(direction_diff_ratio))
 
