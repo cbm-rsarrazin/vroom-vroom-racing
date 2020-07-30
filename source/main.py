@@ -21,8 +21,10 @@ def get_best_speed(best_race):
         last_angle = angle
 
     max_diff = max(angle_diff)
-    best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+
+    best_speed = list(map(lambda diff: 1 - diff / max_diff, angle_diff))
     best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
+    best_speed = list(map(lambda diff: max(1.0 / speed_granularity, diff), best_speed))
 
     return best_speed
 
@@ -163,7 +165,7 @@ if __name__ == "__main__":
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = max(best_speed[nearest_index], 1.0 / speed_granularity)
+    current_best_speed = best_speed[nearest_index]
     current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
     reward += speed_ratio * score_max_speed
@@ -207,6 +209,8 @@ if __name__ == "__main__":
     ox = outer_border[:, 0]
     oy = outer_border[:, 1]
 
+    # plt.plot(best_speed, color='gray')
+
     plt.plot(cx, cy, color='gray')  # center line
     plt.plot(ix, iy, color='lightgray')  # inner line
     plt.plot(ox, oy, color='lightgray')  # outer line
@@ -215,10 +219,10 @@ if __name__ == "__main__":
         ratio = best_speed[i]
         plt.scatter(best_x[i], best_y[i], color=(math.sqrt(1.0 - ratio), 0, ratio**2))
 
-    # plt.scatter(best_x[0], best_y[0], color='green')  # first node
-    # plt.scatter(best_x[len(best_x) - 1], best_y[len(best_y) - 1], color='red')  # last node
-    # plt.scatter(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1], color='green')
-    # plt.scatter(best_race[nearest_interval_indexes[1]][0], best_race[nearest_interval_indexes[1]][1], color='green')
+    plt.scatter(best_x[0], best_y[0], color='green')  # first node
+    plt.scatter(best_x[len(best_x) - 1], best_y[len(best_y) - 1], color='red')  # last node
+    plt.scatter(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1], color='green')
+    plt.scatter(best_race[nearest_interval_indexes[1]][0], best_race[nearest_interval_indexes[1]][1], color='green')
 
     plt.plot([x, x + math.cos(math.radians(heading))], [y, y + math.sin(math.radians(heading))], color='black')
     plt.scatter(x, y, color='black')

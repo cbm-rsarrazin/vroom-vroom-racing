@@ -46,7 +46,7 @@ def reward_function(params):
 
     # speed reward
     best_speed = get_best_speed(best_race)
-    current_best_speed = max(best_speed[nearest_index], 1.0 / speed_granularity)
+    current_best_speed = best_speed[nearest_index]
     current_speed = speed / speed_max
     speed_ratio = 1.0 - abs(current_speed - current_best_speed)
     reward += speed_ratio * score_max_speed
