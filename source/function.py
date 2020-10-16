@@ -27,6 +27,7 @@ def reward_function(params):
     waypoints = params['waypoints']
     track_width = params['track_width']
     speed = params['speed']
+    steering = params['steering_angle']
     progress = params['progress']
     steps = params['steps']
     is_offtrack = params['is_offtrack']
@@ -60,6 +61,10 @@ def reward_function(params):
     if direction_diff <= 30:
         direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
     reward += direction_diff_ratio * score_max_direction
+
+    # steering threshold
+    if steering > 15:
+        reward *= 0.8
 
     # other reward
     if is_offtrack:
