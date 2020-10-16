@@ -1,13 +1,12 @@
-from numpy import linalg
-from numpy import concatenate
-from numpy import linspace
-from numpy import cross
-from numpy import array
+from math import *
 
+from numpy import array
+from numpy import concatenate
+from numpy import cross
+from numpy import linalg
+from numpy import linspace
 from scipy import interpolate
 from scipy.spatial import distance
-
-from math import *
 
 bezier_from_waypoint = 0
 nb_waypoint_used = 30
