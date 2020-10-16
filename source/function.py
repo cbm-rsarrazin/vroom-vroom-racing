@@ -6,16 +6,16 @@ from scipy.spatial import distance
 
 bezier_from_waypoint = 0
 nb_waypoint_used = 30
-nb_point_best_race = 100
-steps_gap = 100
+nb_point_best_race = 70
+steps_gap = 90
 steps_total = 457
 
 speed_max = 4
 speed_granularity = 3
 
-score_max_step = 15
+score_max_step = 30
 score_max_speed = 15
-score_max_distance = 15
+score_max_distance = 10
 score_max_direction = 5
 score_max_complete = 100
 

@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # FS_June2020
     bezier_from_waypoint = 0
     nb_waypoint_used = 30
-    nb_point_best_race = 100
+    nb_point_best_race = 70
     steps_gap = 90
     steps_total = 457
 
@@ -182,9 +182,10 @@ if __name__ == "__main__":
 
     # ----------------------- Plot
     print("\ndistance: " + str(dist))
+    print("best distance: " + str(0.0))
     print("distance ratio: " + str(dist_ratio))
-    print("\ncurrent best speed: " + str(current_best_speed))
-    print("current speed: " + str(current_speed))
+    print("\nspeed: " + str(current_speed))
+    print("best speed: " + str(current_best_speed))
     print("speed ratio: " + str(speed_ratio))
     print("\ndirection: " + str(direction_diff))
     print("best direction: " + str(best_dir))
