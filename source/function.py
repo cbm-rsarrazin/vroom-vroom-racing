@@ -23,7 +23,6 @@ score_max_distance = 10
 score_max_direction = 5
 score_max_complete = 100
 
-
 def reward_function(params):
     x = params['x']
     y = params['y']
