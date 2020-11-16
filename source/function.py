@@ -1,94 +1,165 @@
+from math import *
+
+from numpy import array
+from numpy import concatenate
+from numpy import cross
+from numpy import linalg
+from numpy import linspace
+from scipy import interpolate
+from scipy.spatial import distance
+
+bezier_from_waypoint = 0
+nb_waypoint_used = 30
+nb_point_best_race = 70
+steps_gap = 90
+steps_total = 457
+
+speed_max = 4
+speed_granularity = 3
+
+score_max_step = 30
+score_max_speed = 15
+score_max_distance = 10
+score_max_direction = 5
+score_max_complete = 100
+
 def reward_function(params):
-    import math
-
-    track_width = params['track_width']
-    heading = params['heading']
-    waypoints = params['waypoints']
-    closest_waypoints = params['closest_waypoints']
-
     x = params['x']
     y = params['y']
-    source_idx = closest_waypoints[0]  # closest before car
-    target_idx = source_idx + 2
+    heading = params['heading']
+    waypoints = params['waypoints']
+    track_width = params['track_width']
+    speed = params['speed']
+    steering = params['steering_angle']
+    progress = params['progress']
+    steps = params['steps']
+    is_offtrack = params['is_offtrack']
 
-    # algorithm to find the farest visible waypoints
-    loop = True
-    while loop:
-        if source_idx == target_idx:
-            # all waypoints has been checked
-            return -1
+    reward = 1e-3
 
-        target = waypoints[target_idx % len(waypoints)]
+    # distance reward
+    best_race = get_best_race(waypoints, bezier_from_waypoint, nb_waypoint_used, nb_point_best_race)
+    nearest_index, nearest_interval_indexes = get_nearest_points(best_race, x, y)
+    nearest1 = best_race[nearest_interval_indexes[0]]
+    nearest2 = best_race[nearest_interval_indexes[1]]
+    dist = distance_to_line(x, y, nearest1, nearest2)
+    dist_ratio = 0.0
+    if dist < track_width:
+        dist_ratio = (track_width - dist) / track_width
+    reward += dist_ratio * score_max_distance
 
-        for i in range(source_idx + 1, target_idx):
-            current = waypoints[i % len(waypoints)]
-            print(current)
-            if (dps(current[0], current[1], x, y, target[0], target[1]) >= math.hypot(track_width / 2,
-                                                                                      track_width / 2)):
-                loop = False
-                break
+    # speed reward
+    best_speed = get_best_speed(best_race)
+    current_best_speed = best_speed[nearest_index]
+    current_speed = speed / speed_max
+    speed_ratio = 1.0 - abs(current_speed - current_best_speed)
+    reward += speed_ratio * score_max_speed
 
-        if loop:
-            target_idx = target_idx + 1
-        else:
-            target_idx = target_idx - 1
-            # then exit the loop
-
-    target = waypoints[target_idx % len(waypoints)]
-
-    # angle from car to the farest visible waypoint
-    best_dir = atan2_deg(x, y, target[0], target[1])
-    # angle from first closest waypoint to second clothest waypoint
-    closest_waypoints_dir = atan2_deg(waypoints[closest_waypoints[0]][0], waypoints[closest_waypoints[0]][1],
-                                      waypoints[closest_waypoints[1]][0], waypoints[closest_waypoints[1]][1])
-
-    print("target: " + str(target))
-    print("best dir: " + str(best_dir))
-    print("waypoints dir: " + str(closest_waypoints_dir))
-
-    # compute average angle between best and current waypoints
-    avg_dir = math.atan2((math.sin(math.radians(closest_waypoints_dir)) + math.sin(math.radians(best_dir))) / 2,
-                         (math.cos(math.radians(closest_waypoints_dir)) + math.cos(math.radians(best_dir))) / 2)
-    avg_dir = math.degrees(avg_dir)
-    avg_dir = nor(avg_dir)
-    print("avg dir: " + str(avg_dir))
-
+    # direction reward
+    best_dir = nor(atan2_deg(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1],
+                             best_race[nearest_interval_indexes[1]][0], best_race[nearest_interval_indexes[1]][1]))
     heading = nor(heading)
-    print("heading: " + str(heading))
+    direction_diff = abs(angle_min_diff(heading, best_dir))
+    direction_diff_ratio = 0.0
+    if direction_diff <= 30:
+        direction_diff_ratio = pow(float(1 - direction_diff / 180), 2)
+    reward += direction_diff_ratio * score_max_direction
 
-    # compute angle diff
-    angle_diff = angle_min_diff(heading, avg_dir)
-    print("diff: " + str(angle_diff))
+    # steering threshold
+    if steering > 15:
+        reward *= 0.8
 
-    # score computing
-    return float(1 - math.fabs(angle_diff) / 360)
+    # other reward
+    if is_offtrack:
+        reward = 1e-3
+    elif progress == 100:
+        reward += score_max_complete
+    elif steps % steps_gap == 0 and progress > (steps / steps_total) * 100:
+        reward += score_max_step
+
+    return reward
 
 
-def dps(px, py, x1, y1, x2, y2):
-    import math
+def get_best_speed(best_race):
+    angle_diff = []
+    last_angle = atan2_deg(best_race[0][0], best_race[0][1], best_race[1][0], best_race[1][1])
+    for i in range(1, len(best_race) + 1):
+        p1_x = best_race[i % len(best_race)][0]
+        p1_y = best_race[i % len(best_race)][1]
+        p2_x = best_race[(i + 1) % len(best_race)][0]
+        p2_y = best_race[(i + 1) % len(best_race)][1]
+        angle = atan2_deg(p1_x, p1_y, p2_x, p2_y)
+        diff = abs(angle_min_diff(last_angle, angle))
+        angle_diff.append(diff)
+        last_angle = angle
 
-    mag = math.hypot(x2 - x1, y2 - y1)
+    max_diff = max(angle_diff)
+    best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+    best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
 
-    if mag < 0.00000001:
-        dst = 9999
-        return dst
+    return best_speed
 
-    u1 = (((px - x1) * (x2 - x1)) + ((py - y1) * (y2 - y1)))
-    u = u1 / (mag * mag)
 
-    if (u < 0.00001) or (u > 1):
-        ix = math.hypot(x1 - px, y1 - py)
-        iy = math.hypot(x2 - px, y2 - py)
-        if ix > iy:
-            dst = iy
-        else:
-            dst = ix
+def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
+    waypoint_x = []
+    waypoint_y = []
+    gap = int(len(waypoints) / nb_waypoint)
+    for i in range(loop_from, len(waypoints) + loop_from):
+        if i % gap == 0:
+            waypoint_x.append(waypoints[i % len(waypoints)][0])
+            waypoint_y.append(waypoints[i % len(waypoints)][1])
+
+    k = 3
+    knot_space = range(len(waypoint_x))
+    knots = interpolate.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
+    knots_full = concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
+
+    tckX = knots_full, waypoint_x, k
+    tckY = knots_full, waypoint_y, k
+
+    splineX = interpolate.UnivariateSpline._from_tck(tckX)
+    splineY = interpolate.UnivariateSpline._from_tck(tckY)
+
+    tP = linspace(knot_space[0], knot_space[-1], nb_point)
+    xP = splineX(tP)
+    yP = splineY(tP)
+
+    best_race = []
+    for a, b in zip(xP, yP):
+        best_race.append([a, b])
+
+    return best_race
+
+
+def get_nearest_points(best_race, x, y):
+    nearest_index = distance.cdist([(x, y)], best_race).argmin()
+
+    nearest_prev_index = (nearest_index - 1) % len(best_race)
+    nearest_next_index = (nearest_index + 1) % len(best_race)
+
+    nearest_prev = best_race[nearest_prev_index]
+    nearest_next = best_race[nearest_next_index]
+
+    nearest_prev_dist = sqrt(((nearest_prev[0]-x)**2)+((nearest_prev[1]-y)**2))
+    nearest_next_dist = sqrt(((nearest_next[0]-x)**2)+((nearest_next[1]-y)**2))
+
+    if nearest_prev_dist < nearest_next_dist:
+        return nearest_index, [nearest_prev_index, nearest_index]
     else:
-        ix = x1 + u * (x2 - x1)
-        iy = y1 + u * (y2 - y1)
-        dst = math.hypot(ix - px, iy - py)
+        return nearest_index, [nearest_index, nearest_next_index]
 
-    return dst
+
+def atan2_deg(x1, y1, x2, y2):
+    rad = atan2(y2 - y1, x2 - x1)
+    deg = degrees(rad)
+    return nor(deg)
+
+
+def nor(angle):
+    angle = angle % 360
+    if angle < 0:
+        angle = angle + 360
+    return angle
 
 
 def angle_min_diff(x, y):
@@ -100,15 +171,8 @@ def angle_min_diff(x, y):
     return -arg
 
 
-def atan2_deg(x1, y1, x2, y2):
-    import math
-    rad = math.atan2(y2 - y1, x2 - x1)
-    deg = math.degrees(rad)
-    return nor(deg)
-
-
-def nor(angle):
-    angle = angle % 360
-    if angle < 0:
-        angle = angle + 360
-    return angle
+def distance_to_line(x, y, p1, p2):
+    np1 = array(p1)
+    np2 = array(p2)
+    np3 = array([x, y])
+    return abs(cross(np2 - np1, np3 - np1) / linalg.norm(np2 - np1))
