@@ -1,11 +1,7 @@
-from math import *
+import numpy as np
+import math
 
-from numpy import array
-from numpy import concatenate
-from numpy import cross
-from numpy import linalg
-from numpy import linspace
-from scipy import interpolate
+import scipy.interpolate as si
 from scipy.spatial import distance
 
 bezier_from_waypoint = 0
@@ -22,6 +18,7 @@ score_max_speed = 15
 score_max_distance = 10
 score_max_direction = 5
 score_max_complete = 100
+
 
 def reward_function(params):
     x = params['x']
@@ -111,16 +108,16 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
 
     k = 3
     knot_space = range(len(waypoint_x))
-    knots = interpolate.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
-    knots_full = concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
+    knots = si.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
+    knots_full = np.concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
 
     tckX = knots_full, waypoint_x, k
     tckY = knots_full, waypoint_y, k
 
-    splineX = interpolate.UnivariateSpline._from_tck(tckX)
-    splineY = interpolate.UnivariateSpline._from_tck(tckY)
+    splineX = si.UnivariateSpline._from_tck(tckX)
+    splineY = si.UnivariateSpline._from_tck(tckY)
 
-    tP = linspace(knot_space[0], knot_space[-1], nb_point)
+    tP = np.linspace(knot_space[0], knot_space[-1], nb_point)
     xP = splineX(tP)
     yP = splineY(tP)
 
@@ -140,8 +137,8 @@ def get_nearest_points(best_race, x, y):
     nearest_prev = best_race[nearest_prev_index]
     nearest_next = best_race[nearest_next_index]
 
-    nearest_prev_dist = sqrt(((nearest_prev[0]-x)**2)+((nearest_prev[1]-y)**2))
-    nearest_next_dist = sqrt(((nearest_next[0]-x)**2)+((nearest_next[1]-y)**2))
+    nearest_prev_dist = math.sqrt(((nearest_prev[0]-x)**2)+((nearest_prev[1]-y)**2))
+    nearest_next_dist = math.sqrt(((nearest_next[0]-x)**2)+((nearest_next[1]-y)**2))
 
     if nearest_prev_dist < nearest_next_dist:
         return nearest_index, [nearest_prev_index, nearest_index]
@@ -150,8 +147,8 @@ def get_nearest_points(best_race, x, y):
 
 
 def atan2_deg(x1, y1, x2, y2):
-    rad = atan2(y2 - y1, x2 - x1)
-    deg = degrees(rad)
+    rad = math.atan2(y2 - y1, x2 - x1)
+    deg = math.degrees(rad)
     return nor(deg)
 
 
@@ -172,7 +169,7 @@ def angle_min_diff(x, y):
 
 
 def distance_to_line(x, y, p1, p2):
-    np1 = array(p1)
-    np2 = array(p2)
-    np3 = array([x, y])
-    return abs(cross(np2 - np1, np3 - np1) / linalg.norm(np2 - np1))
+    np1 = np.array(p1)
+    np2 = np.array(p2)
+    np3 = np.array([x, y])
+    return abs(np.cross(np2 - np1, np3 - np1) / np.linalg.norm(np2 - np1))

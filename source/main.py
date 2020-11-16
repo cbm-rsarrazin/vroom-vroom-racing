@@ -1,11 +1,7 @@
-from math import *
+import numpy as np
+import math
 
-from numpy import array
-from numpy import concatenate
-from numpy import cross
-from numpy import linalg
-from numpy import linspace
-from scipy import interpolate
+import scipy.interpolate as si
 from scipy.spatial import distance
 
 import random
@@ -43,16 +39,16 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
 
     k = 3
     knot_space = range(len(waypoint_x))
-    knots = interpolate.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
-    knots_full = concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
+    knots = si.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
+    knots_full = np.concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
 
     tckX = knots_full, waypoint_x, k
     tckY = knots_full, waypoint_y, k
 
-    splineX = interpolate.UnivariateSpline._from_tck(tckX)
-    splineY = interpolate.UnivariateSpline._from_tck(tckY)
+    splineX = si.UnivariateSpline._from_tck(tckX)
+    splineY = si.UnivariateSpline._from_tck(tckY)
 
-    tP = linspace(knot_space[0], knot_space[-1], nb_point)
+    tP = np.linspace(knot_space[0], knot_space[-1], nb_point)
     xP = splineX(tP)
     yP = splineY(tP)
 
@@ -72,8 +68,8 @@ def get_nearest_points(best_race, x, y):
     nearest_prev = best_race[nearest_prev_index]
     nearest_next = best_race[nearest_next_index]
 
-    nearest_prev_dist = sqrt(((nearest_prev[0]-x)**2)+((nearest_prev[1]-y)**2))
-    nearest_next_dist = sqrt(((nearest_next[0]-x)**2)+((nearest_next[1]-y)**2))
+    nearest_prev_dist = math.sqrt(((nearest_prev[0]-x)**2)+((nearest_prev[1]-y)**2))
+    nearest_next_dist = math.sqrt(((nearest_next[0]-x)**2)+((nearest_next[1]-y)**2))
 
     if nearest_prev_dist < nearest_next_dist:
         return nearest_index, [nearest_prev_index, nearest_index]
@@ -82,8 +78,8 @@ def get_nearest_points(best_race, x, y):
 
 
 def atan2_deg(x1, y1, x2, y2):
-    rad = atan2(y2 - y1, x2 - x1)
-    deg = degrees(rad)
+    rad = math.atan2(y2 - y1, x2 - x1)
+    deg = math.degrees(rad)
     return nor(deg)
 
 
@@ -104,10 +100,10 @@ def angle_min_diff(x, y):
 
 
 def distance_to_line(x, y, p1, p2):
-    np1 = array(p1)
-    np2 = array(p2)
-    np3 = array([x, y])
-    return abs(cross(np2 - np1, np3 - np1) / linalg.norm(np2 - np1))
+    np1 = np.array(p1)
+    np2 = np.array(p2)
+    np3 = np.array([x, y])
+    return abs(np.cross(np2 - np1, np3 - np1) / np.linalg.norm(np2 - np1))
 
 
 if __name__ == "__main__":
@@ -140,10 +136,10 @@ if __name__ == "__main__":
     center_line = waypoints[:, 0:2]
     rand_waypoint = center_line[random.randint(0, len(center_line) - 1)]
     rand_dist = random.random()
-    rand_angle = random.random() * pi
+    rand_angle = random.random() * math.pi
 
-    x = rand_waypoint[0] + rand_dist * cos(rand_angle)
-    y = rand_waypoint[1] + rand_dist * sin(rand_angle)
+    x = rand_waypoint[0] + rand_dist * math.cos(rand_angle)
+    y = rand_waypoint[1] + rand_dist * math.sin(rand_angle)
     heading = 10
     track_width = 1
     speed = 2
@@ -221,14 +217,14 @@ if __name__ == "__main__":
 
     for i in range(len(best_speed)):
         ratio = best_speed[i]
-        plt.scatter(best_x[i], best_y[i], color=(sqrt(1.0 - ratio), 0, ratio**2))
+        plt.scatter(best_x[i], best_y[i], color=(math.sqrt(1.0 - ratio), 0, ratio**2))
 
     plt.scatter(best_x[0], best_y[0], color='green')  # first node
     plt.scatter(best_x[len(best_x) - 1], best_y[len(best_y) - 1], color='red')  # last node
     plt.scatter(best_race[nearest_interval_indexes[0]][0], best_race[nearest_interval_indexes[0]][1], color='green')
     plt.scatter(best_race[nearest_interval_indexes[1]][0], best_race[nearest_interval_indexes[1]][1], color='green')
 
-    plt.plot([x, x + cos(radians(heading))], [y, y + sin(radians(heading))], color='black')
+    plt.plot([x, x + math.cos(math.radians(heading))], [y, y + math.sin(math.radians(heading))], color='black')
     plt.scatter(x, y, color='black')
 
     plt.gca().set_aspect('equal', adjustable='box')
