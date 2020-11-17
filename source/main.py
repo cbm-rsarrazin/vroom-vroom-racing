@@ -1,14 +1,13 @@
 import math
-import random
 
-import matplotlib.pyplot as plt
 import numpy as np
-from numpy import load
-from numpy.core import linspace
 from scipy.interpolate import splev
 from scipy.interpolate import splprep
 from scipy.spatial import distance
 
+import random
+import matplotlib.pyplot as plt
+from numpy import load
 
 def get_best_speed(best_race):
     angle_diff = []
@@ -42,6 +41,7 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
 
     x = np.array(waypoint_x)
     y = np.array(waypoint_y)
+    space = [x / nb_point for x in range(0, nb_point)]
 
     # append the starting x,y coordinates
     x = np.r_[x, x[0]]
@@ -49,7 +49,6 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
 
     tck, u = splprep([x, y], s=1.0, per=True)
 
-    space = linspace(0, 1, nb_point)
     xi, yi = splev(space, tck)
     best_race = []
     for a, b in zip(xi, yi):
