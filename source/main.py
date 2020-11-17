@@ -1,12 +1,14 @@
-import numpy as np
 import math
+import random
 
-import scipy.interpolate as si
+import matplotlib.pyplot as plt
+import numpy as np
+from numpy import load
+from numpy.core import linspace
+from scipy.interpolate import splev
+from scipy.interpolate import splprep
 from scipy.spatial import distance
 
-import random
-import matplotlib.pyplot as plt
-from numpy import load
 
 def get_best_speed(best_race):
     angle_diff = []
@@ -22,7 +24,7 @@ def get_best_speed(best_race):
         last_angle = angle
 
     max_diff = max(angle_diff)
-    best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+    best_speed = list(map(lambda diff: (1 - diff/max_diff)**3, angle_diff))
     best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
 
     return best_speed
@@ -37,23 +39,19 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
             waypoint_x.append(waypoints[i % len(waypoints)][0])
             waypoint_y.append(waypoints[i % len(waypoints)][1])
 
-    k = 3
-    knot_space = range(len(waypoint_x))
-    knots = si.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
-    knots_full = np.concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
+    x = np.array(waypoint_x)
+    y = np.array(waypoint_y)
 
-    tckX = knots_full, waypoint_x, k
-    tckY = knots_full, waypoint_y, k
+    # append the starting x,y coordinates
+    x = np.r_[x, x[0]]
+    y = np.r_[y, y[0]]
 
-    splineX = si.UnivariateSpline._from_tck(tckX)
-    splineY = si.UnivariateSpline._from_tck(tckY)
+    tck, u = splprep([x, y], s=1.0, per=True)
 
-    tP = np.linspace(knot_space[0], knot_space[-1], nb_point)
-    xP = splineX(tP)
-    yP = splineY(tP)
-
+    space = linspace(0, 1, nb_point)
+    xi, yi = splev(space, tck)
     best_race = []
-    for a, b in zip(xP, yP):
+    for a, b in zip(xi, yi):
         best_race.append([a, b])
 
     return best_race
@@ -104,6 +102,7 @@ def distance_to_line(x, y, p1, p2):
     np2 = np.array(p2)
     np3 = np.array([x, y])
     return abs(np.cross(np2 - np1, np3 - np1) / np.linalg.norm(np2 - np1))
+
 
 
 if __name__ == "__main__":
@@ -217,7 +216,8 @@ if __name__ == "__main__":
 
     for i in range(len(best_speed)):
         ratio = best_speed[i]
-        plt.scatter(best_x[i], best_y[i], color=(math.sqrt(1.0 - ratio), 0, ratio**2))
+        print(ratio)
+        plt.scatter(best_x[i], best_y[i], color=((1.0 - ratio**2), 0, ratio**2))
 
     plt.scatter(best_x[0], best_y[0], color='green')  # first node
     plt.scatter(best_x[len(best_x) - 1], best_y[len(best_y) - 1], color='red')  # last node

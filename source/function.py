@@ -1,7 +1,9 @@
-import numpy as np
 import math
 
-import scipy.interpolate as si
+import numpy as np
+from numpy.core import linspace
+from scipy.interpolate import splev
+from scipy.interpolate import splprep
 from scipy.spatial import distance
 
 bezier_from_waypoint = 0
@@ -91,7 +93,7 @@ def get_best_speed(best_race):
         last_angle = angle
 
     max_diff = max(angle_diff)
-    best_speed = list(map(lambda diff: 1 - diff/max_diff, angle_diff))
+    best_speed = list(map(lambda diff: (1 - diff/max_diff)**3, angle_diff))
     best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
 
     return best_speed
@@ -106,23 +108,19 @@ def get_best_race(waypoints, loop_from, nb_waypoint, nb_point):
             waypoint_x.append(waypoints[i % len(waypoints)][0])
             waypoint_y.append(waypoints[i % len(waypoints)][1])
 
-    k = 3
-    knot_space = range(len(waypoint_x))
-    knots = si.InterpolatedUnivariateSpline(knot_space, knot_space, k=k).get_knots()
-    knots_full = np.concatenate(([knots[0]] * k, knots, [knots[-1]] * k))
+    x = np.array(waypoint_x)
+    y = np.array(waypoint_y)
 
-    tckX = knots_full, waypoint_x, k
-    tckY = knots_full, waypoint_y, k
+    # append the starting x,y coordinates
+    x = np.r_[x, x[0]]
+    y = np.r_[y, y[0]]
 
-    splineX = si.UnivariateSpline._from_tck(tckX)
-    splineY = si.UnivariateSpline._from_tck(tckY)
+    tck, u = splprep([x, y], s=1.0, per=True)
 
-    tP = np.linspace(knot_space[0], knot_space[-1], nb_point)
-    xP = splineX(tP)
-    yP = splineY(tP)
-
+    space = linspace(0, 1, nb_point)
+    xi, yi = splev(space, tck)
     best_race = []
-    for a, b in zip(xP, yP):
+    for a, b in zip(xi, yi):
         best_race.append([a, b])
 
     return best_race
