@@ -23,7 +23,7 @@ def get_best_speed(best_race):
         last_angle = angle
 
     max_diff = max(angle_diff)
-    best_speed = list(map(lambda diff: (1 - diff/max_diff)**3, angle_diff))
+    best_speed = list(map(lambda diff: (1 - diff/max_diff), angle_diff))
     best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
     best_speed = list(map(lambda diff: 1.0 if diff == 0.0 else diff, best_speed))
 
