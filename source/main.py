@@ -26,6 +26,7 @@ def get_best_speed(best_race):
     max_diff = max(angle_diff)
     best_speed = list(map(lambda diff: (1 - diff/max_diff)**3, angle_diff))
     best_speed = list(map(lambda diff: round(diff * speed_granularity) / speed_granularity, best_speed))
+    best_speed = list(map(lambda diff: 1.0 if diff == 0.0 else diff, best_speed))
 
     return best_speed
 
@@ -216,7 +217,6 @@ if __name__ == "__main__":
 
     for i in range(len(best_speed)):
         ratio = best_speed[i]
-        print(ratio)
         plt.scatter(best_x[i], best_y[i], color=((1.0 - ratio**2), 0, ratio**2))
 
     plt.scatter(best_x[0], best_y[0], color='green')  # first node
